@@ -111,6 +111,88 @@ class TestNumpyLoader:
         tensor = loaded.get_tensor("model")
         assert tensor.metadata.shape == [128, 256, 512]
 
+    def test_config_sidecar_for_single_file(self, tmp_path):
+        """A single .npz/.npy with a matching .json sidecar should pick up architecture info."""
+        config = {
+            "architectures": ["LlamaForCausalLM"],
+            "model_type": "llama",
+            "num_hidden_layers": 2,
+            "hidden_size": 128,
+            "num_attention_heads": 4,
+            "num_key_value_heads": 4,
+            "vocab_size": 1024,
+        }
+        p = tmp_path / "tiny_llama.npz"
+        np.savez(p, weight=np.random.randn(128, 128).astype(np.float16))
+        (tmp_path / "tiny_llama.json").write_text(json.dumps(config))
+
+        loader = NumpyLoader()
+        source = ModelSource(p, ModelFormat.NUMPY)
+        loaded = loader.load(source)
+
+        assert loaded.metadata.architecture == "LlamaForCausalLM"
+        assert loaded.metadata.num_layers == 2
+        assert loaded.metadata.hidden_size == 128
+        assert loaded.metadata.vocab_size == 1024
+
+    def test_config_sidecar_for_metadata_only(self, tmp_path):
+        """metadata-only load of a single file should also read the JSON sidecar."""
+        config = {"model_type": "llama", "num_hidden_layers": 4, "hidden_size": 256}
+        p = tmp_path / "model.npz"
+        np.savez(p, weight=np.random.randn(256, 256).astype(np.float16))
+        (tmp_path / "model.json").write_text(json.dumps(config))
+
+        loader = NumpyLoader(metadata_only=True)
+        source = ModelSource(p, ModelFormat.NUMPY)
+        metadata = loader.load_metadata(source)
+
+        assert metadata.architecture == "llama"
+        assert metadata.num_layers == 4
+        assert metadata.hidden_size == 256
+        assert metadata.total_parameters == 256 * 256
+
+    def test_invalid_config_sidecar_is_ignored(self, tmp_path):
+        """A malformed JSON sidecar should not break loading."""
+        p = tmp_path / "model.npz"
+        np.savez(p, weight=np.random.randn(64, 64).astype(np.float16))
+        (tmp_path / "model.json").write_text("{not valid json")
+
+        loader = NumpyLoader()
+        source = ModelSource(p, ModelFormat.NUMPY)
+        loaded = loader.load(source)
+
+        assert loaded.metadata.architecture == "unknown"
+        assert loaded.total_parameters == 64 * 64
+
+    def test_valid_json_non_dict_sidecar_is_ignored(self, tmp_path):
+        """Valid JSON that is not an object (e.g. a list) should be ignored."""
+        p = tmp_path / "model.npz"
+        np.savez(p, weight=np.random.randn(64, 64).astype(np.float16))
+        (tmp_path / "model.json").write_text(json.dumps(["not", "a", "config"]))
+
+        loader = NumpyLoader()
+        source = ModelSource(p, ModelFormat.NUMPY)
+        loaded = loader.load(source)
+
+        assert loaded.config == {}
+        assert loaded.metadata.config == {}
+        assert loaded.metadata.architecture == "unknown"
+        assert loaded.total_parameters == 64 * 64
+
+    def test_valid_json_non_dict_directory_config_is_ignored(self, tmp_path):
+        """A directory config.json holding a JSON list should not poison metadata."""
+        (tmp_path / "config.json").write_text(json.dumps([1, 2, 3]))
+        arr = np.random.randn(64, 64).astype(np.float16)
+        np.save(tmp_path / "weights.npy", arr)
+
+        loader = NumpyLoader()
+        source = ModelSource(tmp_path, ModelFormat.NUMPY, is_directory=True)
+        loaded = loader.load(source)
+
+        assert loaded.metadata.architecture == "unknown"
+        assert loaded.metadata.num_layers is None
+        assert loaded.total_parameters == 64 * 64
+
     def test_config_from_directory(self, tmp_path):
         config = {
             "architectures": ["LlamaForCausalLM"],

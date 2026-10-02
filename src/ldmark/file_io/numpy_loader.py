@@ -26,19 +26,41 @@ class NumpyLoader(BaseModelLoader):
 
     def load(self, source: ModelSource) -> LoadedModel:
         self._validate_source(source)
+        config = self._resolve_config(source)
 
         if source.is_directory:
-            return self._load_from_directory(source)
-        return self._load_from_file(source)
+            return self._load_from_directory(source, config)
+        return self._load_from_file(source, config)
 
     def load_metadata(self, source: ModelSource) -> ModelMetadata:
         self._validate_source(source)
+        config = self._resolve_config(source)
 
         if source.is_directory:
-            return self._load_metadata_from_directory(source)
-        return self._load_metadata_from_file(source)
+            return self._load_metadata_from_directory(source, config)
+        return self._load_metadata_from_file(source, config)
 
-    def _load_from_file(self, source: ModelSource) -> LoadedModel:
+    def _resolve_config(self, source: ModelSource) -> Dict[str, Any]:
+        """Single owner of the config convention: a model directory may carry a
+        config.json; a single NumPy file may carry a same-stem .json sidecar
+        (e.g. tiny_llama.npz + tiny_llama.json)."""
+        if source.is_directory:
+            return self._read_json_config(source.path / "config.json")
+        return self._read_json_config(source.path.with_suffix(".json"))
+
+    @staticmethod
+    def _read_json_config(path: Path) -> Dict[str, Any]:
+        """Read a JSON config; missing, malformed, or non-dict JSON yields {}."""
+        if not path.exists():
+            return {}
+        try:
+            with open(path, "r") as f:
+                config = json.load(f)
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+            return {}
+        return config if isinstance(config, dict) else {}
+
+    def _load_from_file(self, source: ModelSource, config: Dict[str, Any]) -> LoadedModel:
         try:
             data = np.load(source.path, allow_pickle=False)
         except Exception as e:
@@ -52,9 +74,9 @@ class NumpyLoader(BaseModelLoader):
         else:
             raise MalformedStateDictError(f"Unexpected NumPy file format in {source.path}")
 
-        return self._build_loaded_model(source, tensors_dict)
+        return self._build_loaded_model(source, tensors_dict, config)
 
-    def _load_from_directory(self, source: ModelSource) -> LoadedModel:
+    def _load_from_directory(self, source: ModelSource, config: Dict[str, Any]) -> LoadedModel:
         npy_files = sorted(source.path.glob("*.npy"))
         npz_files = sorted(source.path.glob("*.npz"))
 
@@ -79,9 +101,9 @@ class NumpyLoader(BaseModelLoader):
             except Exception as e:
                 raise CorruptFileError(f"Failed to load {npz_file}: {e}")
 
-        return self._build_loaded_model(source, tensors_dict)
+        return self._build_loaded_model(source, tensors_dict, config)
 
-    def _load_metadata_from_file(self, source: ModelSource) -> ModelMetadata:
+    def _load_metadata_from_file(self, source: ModelSource, config: Dict[str, Any]) -> ModelMetadata:
         try:
             data = np.load(source.path, allow_pickle=False)
         except Exception as e:
@@ -99,9 +121,9 @@ class NumpyLoader(BaseModelLoader):
         else:
             raise MalformedStateDictError(f"Unexpected NumPy file format in {source.path}")
 
-        return self._build_metadata(source, tensor_names, shapes, dtypes, {})
+        return self._build_metadata(source, tensor_names, shapes, dtypes, config)
 
-    def _load_metadata_from_directory(self, source: ModelSource) -> ModelMetadata:
+    def _load_metadata_from_directory(self, source: ModelSource, config: Dict[str, Any]) -> ModelMetadata:
         npy_files = sorted(source.path.glob("*.npy"))
         npz_files = sorted(source.path.glob("*.npz"))
 
@@ -127,10 +149,14 @@ class NumpyLoader(BaseModelLoader):
                 dtypes[name] = data[key].dtype
             data.close()
 
-        return self._build_metadata(source, tensor_names, shapes, dtypes, {})
+        return self._build_metadata(source, tensor_names, shapes, dtypes, config)
 
-    def _build_loaded_model(self, source: ModelSource, tensors_dict: Dict[str, Any]) -> LoadedModel:
-        config = self._load_config_from_directory(source)
+    def _build_loaded_model(
+        self,
+        source: ModelSource,
+        tensors_dict: Dict[str, Any],
+        config: Dict[str, Any],
+    ) -> LoadedModel:
         arch_info = self._extract_architecture_from_config(config) if config else {}
 
         tensor_metadatas = []
@@ -227,17 +253,3 @@ class NumpyLoader(BaseModelLoader):
             tensors=tensor_metadatas,
             config=config,
         )
-
-    def _load_config_from_directory(self, source: ModelSource) -> Dict[str, Any]:
-        if not source.is_directory:
-            return {}
-
-        config_path = source.path / "config.json"
-        if config_path.exists():
-            try:
-                with open(config_path, "r") as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                pass
-
-        return {}

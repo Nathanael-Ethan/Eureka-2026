@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "experiment_id": "exp_20261001_101738_89ace549",
+    "timestamp": "2026-10-01T10:17:38.198761",
+    "random_seed": 42,
+    "model_description": "Tiny Llama 2-layer, 128 hidden, 512 intermediate, 4 heads, 1024 vocab (FP16)",
+    "model_path": "/Users/net/Desktop/Web Dev Projects/Eureka-2026/experiments/real_model/tiny_llama_2L_128H.npz",
+    "compression_config": {
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "symmetric": true,
+      "precisions": [
+        "INT8",
+        "INT4",
+        "BINARY",
+        "TERNARY"
+      ]
+    },
+    "hardware_info": {
+      "cpu_model": "Apple M2",
+      "cpu_cores": 8,
+      "cpu_architecture": "arm64",
+      "system_ram_gb": 8.0,
+      "gpu_model": "Apple M2",
+      "gpu_vram_gb": null,
+      "gpu_vendor": "apple",
+      "operating_system": "Darwin",
+      "python_version": "3.13.0"
+    },
+    "software_info": {
+      "python_version": "3.13.0",
+      "platform": "macOS-15.7.1-arm64-arm-64bit-Mach-O",
+      "numpy_version": "2.5.2",
+      "torch_version": "2.14.0",
+      "safetensors_version": "not installed"
+    },
+    "git_commit": "733d5a63c899824f1d0ee671eaa454b1f210a408"
+  },
+  "model": {
+    "parameter_count": 787072,
+    "tensor_count": 17,
+    "original_storage_bytes": 1449631,
+    "original_storage_mb": 1.3824758529663086,
+    "architecture": "unknown",
+    "num_layers": 2,
+    "hidden_size": 128,
+    "vocab_size": 1024
+  },
+  "hardware": {
+    "cpu_model": "Apple M2",
+    "cpu_cores": 8,
+    "cpu_architecture": "arm64",
+    "system_ram_gb": 8.0,
+    "gpu_model": "Apple M2",
+    "gpu_vram_gb": null,
+    "gpu_vendor": "apple",
+    "operating_system": "Darwin",
+    "python_version": "3.13.0"
+  },
+  "compression_results": [
+    {
+      "precision": "INT8",
+      "compressed_storage_bytes": 787072,
+      "compressed_storage_mb": 0.7506103515625,
+      "scale_storage_bytes": 12298,
+      "total_compressed_bytes": 799370,
+      "total_compressed_mb": 0.7623386383056641,
+      "bits_per_weight": 8.125,
+      "compression_ratio": 1.9692307692307693,
+      "mae": 0.0001105355637432463,
+      "mse": 1.6712471194436928e-08,
+      "max_abs_error": 0.00037670135498046875,
+      "relative_error": 0.006457096555546168,
+      "transformation_time_seconds": 0.10012292861938477,
+      "validation_time_seconds": 2.5033950805664062e-05,
+      "export_size_bytes": 776756
+    },
+    {
+      "precision": "INT4",
+      "compressed_storage_bytes": 393536,
+      "compressed_storage_mb": 0.37530517578125,
+      "scale_storage_bytes": 12298,
+      "total_compressed_bytes": 405834,
+      "total_compressed_mb": 0.38703346252441406,
+      "bits_per_weight": 4.125,
+      "compression_ratio": 3.878787878787879,
+      "mae": 0.0020016827887891367,
+      "mse": 5.496562053503071e-06,
+      "max_abs_error": 0.0068359375,
+      "relative_error": 0.1171107732239326,
+      "transformation_time_seconds": 3.6344850063323975,
+      "validation_time_seconds": 3.0040740966796875e-05,
+      "export_size_bytes": 369521
+    },
+    {
+      "precision": "BINARY",
+      "compressed_storage_bytes": 98384,
+      "compressed_storage_mb": 0.0938262939453125,
+      "scale_storage_bytes": 12298,
+      "total_compressed_bytes": 110682,
+      "total_compressed_mb": 0.10555458068847656,
+      "bits_per_weight": 1.125,
+      "compression_ratio": 14.222222222222221,
+      "mae": 0.009599929161255903,
+      "mse": 0.00014411416541172315,
+      "max_abs_error": 0.07794189453125,
+      "relative_error": 0.5996680530601864,
+      "transformation_time_seconds": 0.4300200939178467,
+      "validation_time_seconds": 3.1948089599609375e-05,
+      "export_size_bytes": 129362
+    },
+    {
+      "precision": "TERNARY",
+      "compressed_storage_bytes": 196768,
+      "compressed_storage_mb": 0.187652587890625,
+      "scale_storage_bytes": 12298,
+      "total_compressed_bytes": 209066,
+      "total_compressed_mb": 0.19938087463378906,
+      "bits_per_weight": 2.125,
+      "compression_ratio": 7.529411764705882,
+      "mae": 0.015282691800492791,
+      "mse": 0.00035987130738336165,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9476150809193272,
+      "transformation_time_seconds": 0.7010979652404785,
+      "validation_time_seconds": 2.288818359375e-05,
+      "export_size_bytes": 49301
+    }
+  ],
+  "notes": [
+    "All measurements are factual results from actual compilation runs.",
+    "Compression ratios are measured, not estimated.",
+    "Storage size is serialized file size; runtime memory is separate.",
+    "Binary and ternary are research-quality and have significant quality loss.",
+    "Deterministic results ensured by fixed random seed (42)."
+  ]
+}

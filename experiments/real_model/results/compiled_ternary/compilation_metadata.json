@@ -1,0 +1,389 @@
+{
+  "format_version": "ldmark-compilation-0.1",
+  "is_experimental": true,
+  "created_at": "2026-10-01T10:33:09.517883",
+  "model_id": "tiny_llama_2L_128H",
+  "source_path": "/Users/net/Desktop/Web Dev Projects/Eureka-2026/experiments/real_model/tiny_llama_2L_128H.npz",
+  "architecture": "llama",
+  "parameter_count": 787072,
+  "compression_method": "ternary",
+  "target_bits": 2,
+  "group_size": 128,
+  "scale_dtype": "float16",
+  "symmetric": true,
+  "tensors": [
+    {
+      "name": "model.embed_tokens.weight",
+      "original_shape": [
+        1024,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 262144,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32768,
+      "num_scales": 1024,
+      "scale_size_bytes": 2048,
+      "bits_per_weight": 2.125,
+      "mae": 0.015275894738806528,
+      "mse": 0.000359860237608388,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9481490489601365
+    },
+    {
+      "name": "model.layers.0.self_attn.qkv_proj.weight",
+      "original_shape": [
+        384,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 98304,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 12288,
+      "num_scales": 384,
+      "scale_size_bytes": 768,
+      "bits_per_weight": 2.125,
+      "mae": 0.015360807394851387,
+      "mse": 0.0003631819278254429,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9543856079586582
+    },
+    {
+      "name": "model.layers.0.self_attn.o_proj.weight",
+      "original_shape": [
+        128,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 32768,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 4096,
+      "num_scales": 128,
+      "scale_size_bytes": 256,
+      "bits_per_weight": 2.125,
+      "mae": 0.015282515891158255,
+      "mse": 0.00036172029337768114,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9498070895483497
+    },
+    {
+      "name": "model.layers.0.mlp.gate_proj.weight",
+      "original_shape": [
+        512,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 131072,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 16384,
+      "num_scales": 512,
+      "scale_size_bytes": 1024,
+      "bits_per_weight": 2.125,
+      "mae": 0.015288971329027845,
+      "mse": 0.00035864222944690516,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9463474759873187
+    },
+    {
+      "name": "model.layers.0.mlp.up_proj.weight",
+      "original_shape": [
+        512,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 131072,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 16384,
+      "num_scales": 512,
+      "scale_size_bytes": 1024,
+      "bits_per_weight": 2.125,
+      "mae": 0.015264157235833409,
+      "mse": 0.0003591424694828126,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.946279433788562
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "original_shape": [
+        128,
+        512
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 131072,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 16384,
+      "num_scales": 512,
+      "scale_size_bytes": 1024,
+      "bits_per_weight": 2.125,
+      "mae": 0.015316861624341982,
+      "mse": 0.00036110839984464894,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.949484827284958
+    },
+    {
+      "name": "model.layers.0.input_layernorm.weight",
+      "original_shape": [
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 256,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32,
+      "num_scales": 1,
+      "scale_size_bytes": 2,
+      "bits_per_weight": 2.125,
+      "mae": 0.0,
+      "mse": 0.0,
+      "max_abs_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "name": "model.layers.0.post_attention_layernorm.weight",
+      "original_shape": [
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 256,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32,
+      "num_scales": 1,
+      "scale_size_bytes": 2,
+      "bits_per_weight": 2.125,
+      "mae": 0.0,
+      "mse": 0.0,
+      "max_abs_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "name": "model.layers.1.self_attn.qkv_proj.weight",
+      "original_shape": [
+        384,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 98304,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 12288,
+      "num_scales": 384,
+      "scale_size_bytes": 768,
+      "bits_per_weight": 2.125,
+      "mae": 0.015361518853751477,
+      "mse": 0.0003641117271359566,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9502268443481037
+    },
+    {
+      "name": "model.layers.1.self_attn.o_proj.weight",
+      "original_shape": [
+        128,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 32768,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 4096,
+      "num_scales": 128,
+      "scale_size_bytes": 256,
+      "bits_per_weight": 2.125,
+      "mae": 0.015207002696115524,
+      "mse": 0.00035667416581140537,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9480506191641023
+    },
+    {
+      "name": "model.layers.1.mlp.gate_proj.weight",
+      "original_shape": [
+        512,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 131072,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 16384,
+      "num_scales": 512,
+      "scale_size_bytes": 1024,
+      "bits_per_weight": 2.125,
+      "mae": 0.015308976770938898,
+      "mse": 0.00036020463150907505,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9468556798932293
+    },
+    {
+      "name": "model.layers.1.mlp.up_proj.weight",
+      "original_shape": [
+        512,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 131072,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 16384,
+      "num_scales": 512,
+      "scale_size_bytes": 1024,
+      "bits_per_weight": 2.125,
+      "mae": 0.015315756434574723,
+      "mse": 0.0003618099159102071,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9484355219299349
+    },
+    {
+      "name": "model.layers.1.mlp.down_proj.weight",
+      "original_shape": [
+        128,
+        512
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 131072,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 16384,
+      "num_scales": 512,
+      "scale_size_bytes": 1024,
+      "bits_per_weight": 2.125,
+      "mae": 0.015303920527003356,
+      "mse": 0.000360034454378484,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9491733949237351
+    },
+    {
+      "name": "model.layers.1.input_layernorm.weight",
+      "original_shape": [
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 256,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32,
+      "num_scales": 1,
+      "scale_size_bytes": 2,
+      "bits_per_weight": 2.125,
+      "mae": 0.0,
+      "mse": 0.0,
+      "max_abs_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "name": "model.layers.1.post_attention_layernorm.weight",
+      "original_shape": [
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 256,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32,
+      "num_scales": 1,
+      "scale_size_bytes": 2,
+      "bits_per_weight": 2.125,
+      "mae": 0.0,
+      "mse": 0.0,
+      "max_abs_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "name": "model.norm.weight",
+      "original_shape": [
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 256,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32,
+      "num_scales": 1,
+      "scale_size_bytes": 2,
+      "bits_per_weight": 2.125,
+      "mae": 0.0,
+      "mse": 0.0,
+      "max_abs_error": 0.0,
+      "relative_error": 0.0
+    },
+    {
+      "name": "lm_head.weight",
+      "original_shape": [
+        1024,
+        128
+      ],
+      "original_dtype": "float16",
+      "original_size_bytes": 262144,
+      "compression_method": "ternary",
+      "target_bits": 2,
+      "group_size": 128,
+      "scale_dtype": "float16",
+      "compressed_size_bytes": 32768,
+      "num_scales": 1024,
+      "scale_size_bytes": 2048,
+      "bits_per_weight": 2.125,
+      "mae": 0.015263494455211912,
+      "mse": 0.0003581193125146377,
+      "max_abs_error": 0.049957275390625,
+      "relative_error": 0.9474184132101672
+    }
+  ],
+  "total_original_size_bytes": 1574144,
+  "total_compressed_size_bytes": 196768,
+  "total_scale_size_bytes": 12298,
+  "overall_compression_ratio": 7.529411764705882,
+  "overall_bits_per_weight": 2.125,
+  "validation_status": "passed",
+  "validation_details": {
+    "num_tensors_validated": 17,
+    "shape_preserved": true,
+    "count_preserved": true,
+    "storage_reduced": true,
+    "total_original_bytes": 1574144,
+    "total_compressed_bytes": 209066,
+    "compression_ratio": 7.529411764705882,
+    "max_mae": 0.015361518853751477,
+    "max_mse": 0.0003641117271359566,
+    "max_relative_error": 0.9543856079586582
+  },
+  "warnings": [
+    "Ternary compression will cause moderate quality degradation."
+  ]
+}

@@ -104,6 +104,23 @@ class TestDetectFormatFromDirectory:
         source = detect_format_from_path(tmp_path)
         assert source.format == ModelFormat.NUMPY
 
+    def test_detect_directory_with_config_and_numpy_is_numpy(self, tmp_path):
+        """config.json next to NumPy weights should not mask the tensors —
+        the NUMPY loader reads the config as a sidecar."""
+        (tmp_path / "config.json").write_text(json.dumps({"model_type": "llama"}))
+        np.save(tmp_path / "weights.npy", np.array([1, 2, 3]))
+        source = detect_format_from_path(tmp_path)
+        assert source.format == ModelFormat.NUMPY
+        assert source.is_directory is True
+
+    def test_detect_directory_with_broken_config_json_falls_to_json(self, tmp_path):
+        """An unreadable config.json with no tensor files still resolves to
+        JSON_CONFIG via the generic .json rule."""
+        (tmp_path / "config.json").write_text("{not valid json")
+        source = detect_format_from_path(tmp_path)
+        assert source.format == ModelFormat.JSON_CONFIG
+        assert source.is_directory is True
+
     def test_detect_empty_directory(self, tmp_path):
         source = detect_format_from_path(tmp_path)
         assert source.format == ModelFormat.UNKNOWN

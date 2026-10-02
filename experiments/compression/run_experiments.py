@@ -4,8 +4,12 @@ Example experiment runner for LDMARK compression laboratory.
 Run this to see the compression laboratory in action.
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+
 import numpy as np
-from src.ldmark.compression import (
+from ldmark.compression import (
     ExperimentConfig,
     QuantizationTarget,
     run_quantization_experiment,

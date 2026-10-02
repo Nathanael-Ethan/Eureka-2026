@@ -67,20 +67,16 @@ def _detect_format_from_directory(path: Path) -> ModelSource:
     files = list(path.iterdir())
     file_names = {f.name.lower() for f in files}
 
+    # Single priority chain: safetensors > pytorch > numpy > json-config-only.
+    # Config weights (architectures/model_type) only decide when no tensor files
+    # are present, so a config.json next to NumPy weights resolves to NUMPY and
+    # the NUMPY loader picks up the config as a sidecar.
+    has_config_weights = False
     if "config.json" in file_names:
-        config_path = path / "config.json"
         try:
-            with open(config_path, "r") as f:
+            with open(path / "config.json", "r") as f:
                 config = json.load(f)
-            if "architectures" in config or "model_type" in config:
-                has_safetensors = any(f.suffix == ".safetensors" for f in files)
-                has_pytorch = any(f.suffix in (".bin", ".pt", ".pth") for f in files)
-
-                if has_safetensors:
-                    return ModelSource(path, ModelFormat.SAFETENSORS, is_directory=True)
-                if has_pytorch:
-                    return ModelSource(path, ModelFormat.PYTORCH, is_directory=True)
-                return ModelSource(path, ModelFormat.JSON_CONFIG, is_directory=True)
+            has_config_weights = "architectures" in config or "model_type" in config
         except (json.JSONDecodeError, UnicodeDecodeError):
             pass
 
@@ -93,7 +89,7 @@ def _detect_format_from_directory(path: Path) -> ModelSource:
     if any(f.suffix in (".npy", ".npz") for f in files):
         return ModelSource(path, ModelFormat.NUMPY, is_directory=True)
 
-    if any(f.suffix == ".json" for f in files):
+    if has_config_weights or any(f.suffix == ".json" for f in files):
         return ModelSource(path, ModelFormat.JSON_CONFIG, is_directory=True)
 
     return ModelSource(path, ModelFormat.UNKNOWN, is_directory=True)
