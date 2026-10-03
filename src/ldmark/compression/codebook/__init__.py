@@ -33,6 +33,8 @@ from .experiment import (
     CodebookExperimentResult,
     run_codebook_experiment,
     run_uniform_vs_codebook_experiment,
+    run_binary_codebook_experiment,
+    generate_test_tensor,
 )
 
 __all__ = [
@@ -60,4 +62,6 @@ __all__ = [
     "CodebookExperimentResult",
     "run_codebook_experiment",
     "run_uniform_vs_codebook_experiment",
+    "run_binary_codebook_experiment",
+    "generate_test_tensor",
 ]
