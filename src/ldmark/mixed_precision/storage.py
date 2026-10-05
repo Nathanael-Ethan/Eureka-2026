@@ -49,6 +49,7 @@ class StorageAccounting:
     components: List[StorageComponent]
     total_bytes: int
     total_parameters: int
+    total_tensors: int
     average_bits_per_weight: float
     compression_ratio: float  # vs FP32 baseline
     precision_distribution: Dict[str, int]
@@ -60,6 +61,7 @@ class StorageAccounting:
             "components": [c.to_dict() for c in self.components],
             "total_bytes": self.total_bytes,
             "total_parameters": self.total_parameters,
+            "total_tensors": self.total_tensors,
             "average_bits_per_weight": self.average_bits_per_weight,
             "compression_ratio": self.compression_ratio,
             "precision_distribution": self.precision_distribution,
@@ -97,8 +99,8 @@ class MixedPrecisionStorageModel:
         artifact_overhead_factor: float = 1.02,  # 2% format overhead
     ):
         self.group_size = group_size
-        self.scale_dtype = scale_dtype
-        self.scale_bytes = scale_dtype.itemsize
+        self.scale_dtype = np.dtype(scale_dtype)
+        self.scale_bytes = self.scale_dtype.itemsize
         self.tensor_header_bytes = tensor_header_bytes
         self.alignment_bytes = alignment_bytes
         self.artifact_overhead_factor = artifact_overhead_factor
@@ -110,7 +112,14 @@ class MixedPrecisionStorageModel:
     ) -> StorageComponent:
         """Calculate storage for a single tensor."""
         prec = assignment.precision
-        num_params = assignment.candidate.estimated_storage_bytes if assignment.candidate else 0
+        
+        # Get number of parameters from classification or candidate
+        if tensor_classification:
+            num_params = tensor_classification.num_parameters
+        elif assignment.candidate:
+            num_params = assignment.candidate.estimated_storage_bytes
+        else:
+            num_params = 0
         
         if prec == PrecisionType.FP32:
             weight_bytes = num_params * 4
@@ -125,26 +134,26 @@ class MixedPrecisionStorageModel:
         elif prec == PrecisionType.INT8:
             # Group-wise INT8
             group_size = assignment.group_size or self.group_size
-            num_groups = (num_params + group_size - 1) // group_size
+            num_groups = (num_params + group_size - 1) // group_size if num_params > 0 else 0
             weight_bytes = num_params  # 1 byte per weight
             scale_bytes = num_groups * self.scale_bytes
-            bits_per_weight = (weight_bytes * 8 + scale_bytes * 8) / num_params
+            bits_per_weight = (weight_bytes * 8 + scale_bytes * 8) / num_params if num_params > 0 else 0
             
         elif prec == PrecisionType.INT4:
             # Group-wise INT4 (packed)
             group_size = assignment.group_size or self.group_size
-            num_groups = (num_params + group_size - 1) // group_size
+            num_groups = (num_params + group_size - 1) // group_size if num_params > 0 else 0
             weight_bytes = (num_params + 1) // 2  # 2 weights per byte
             scale_bytes = num_groups * self.scale_bytes
-            bits_per_weight = (weight_bytes * 8 + scale_bytes * 8) / num_params
+            bits_per_weight = (weight_bytes * 8 + scale_bytes * 8) / num_params if num_params > 0 else 0
             
         elif prec == PrecisionType.BINARY:
             # Binary: 1 bit per weight + scale
             group_size = assignment.group_size or self.group_size
-            num_groups = (num_params + group_size - 1) // group_size
+            num_groups = (num_params + group_size - 1) // group_size if num_params > 0 else 0
             weight_bytes = (num_params + 7) // 8
             scale_bytes = num_groups * self.scale_bytes
-            bits_per_weight = (weight_bytes * 8 + scale_bytes * 8) / num_params
+            bits_per_weight = (weight_bytes * 8 + scale_bytes * 8) / num_params if num_params > 0 else 0
             
         elif prec == PrecisionType.TERNARY:
             # Ternary: 2 bits per weight (4 values in 2 bits) + scale
@@ -229,6 +238,7 @@ class MixedPrecisionStorageModel:
             components=components,
             total_bytes=total_bytes,
             total_parameters=total_parameters,
+            total_tensors=len(components),
             average_bits_per_weight=avg_bpw,
             compression_ratio=compression_ratio,
             precision_distribution=precision_dist,

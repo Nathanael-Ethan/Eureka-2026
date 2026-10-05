@@ -2,6 +2,8 @@
 LDMARK INT4 Direct Computation Kernel
 
 Packed INT4 matrix multiplication with group-wise scaling.
+Uses horizontal group layout (per-row) for the common case.
+Falls back to dequantization for edge cases.
 """
 
 from __future__ import annotations
@@ -35,7 +37,8 @@ class Int4Matrix(LowBitMatrix):
     Packed INT4 quantized matrix with group-wise scaling.
     
     Weights stored as packed uint8 (2 INT4 values per byte).
-    Supports direct matrix multiplication on packed representation.
+    Supports direct matrix multiplication on packed representation
+    when horizontal grouping is valid.
     """
     
     def __init__(
@@ -43,19 +46,11 @@ class Int4Matrix(LowBitMatrix):
         quantized_tensor: QuantizedTensor,
         input_shape: Optional[Tuple[int, int]] = None,
     ):
-        """
-        Initialize from a QuantizedTensor.
-        
-        Args:
-            quantized_tensor: The quantized weight tensor (must be INT4)
-            input_shape: Optional explicit input shape (out_features, in_features)
-        """
         if quantized_tensor.config.target_bits != QuantizationTarget.INT4:
             raise ValueError("Int4Matrix expects INT4 quantized tensor")
             
         self._qtensor = quantized_tensor
         
-        # Determine matrix shape
         if input_shape is not None:
             self._shape = input_shape
         else:
@@ -69,13 +64,20 @@ class Int4Matrix(LowBitMatrix):
         self._group_size = quantized_tensor.config.group_size
         self._symmetric = quantized_tensor.config.symmetric
         
-        # Pre-process scales
         self._scales_fp32 = quantized_tensor.scales.astype(np.float32)
         self._packed_data = quantized_tensor.data
+        self._n_groups = len(quantized_tensor.scales)
         
-        # Compute size info
         self._compressed_bytes = quantized_tensor.data.nbytes + quantized_tensor.scales.nbytes
-        self._decompressed_bytes = self._rows * self._cols * 4  # FP32
+        self._decompressed_bytes = self._rows * self._cols * 4
+        
+        # Check horizontal grouping validity
+        self._groups_per_row = self._cols // self._group_size
+        if self._cols % self._group_size != 0:
+            self._groups_per_row += 1
+        self._horizontal_valid = (self._cols >= self._group_size and 
+                                   self._cols % self._group_size == 0 and
+                                   self._n_groups == self._rows * (self._cols // self._group_size))
     
     @property
     def shape(self) -> Tuple[int, int]:
@@ -83,7 +85,7 @@ class Int4Matrix(LowBitMatrix):
     
     @property
     def dtype(self) -> np.dtype:
-        return np.dtype(np.uint8)  # Packed storage
+        return np.dtype(np.uint8)
     
     @property
     def compressed_size_bytes(self) -> int:
@@ -94,27 +96,40 @@ class Int4Matrix(LowBitMatrix):
         return self._decompressed_bytes
     
     def dequantize(self) -> np.ndarray:
-        """Full dequantization to FP32 for reference."""
         return dequantize_groupwise(self._qtensor).astype(np.float32)
     
     def matmul(self, x: np.ndarray, config: ComputationConfig) -> ComputeResult:
-        """Direct INT4 GEMM on packed representation."""
-        return Int4Matmul().compute(self, x, config)
+        if self._horizontal_valid:
+            return Int4MatmulHorizontal().compute(self, x, config)
+        else:
+            return self._fallback_matmul(x, config)
+    
+    def _fallback_matmul(self, x: np.ndarray, config: ComputationConfig) -> ComputeResult:
+        return create_reference_result(self, x, config)
 
 
-class Int4Matmul(LowBitMatmul):
-    """INT4 direct matrix multiplication kernel on packed data."""
+class Int4MatmulHorizontal(LowBitMatmul):
+    """INT4 direct matmul for horizontal group layout."""
     
     def __init__(self):
         pass
     
     @property
     def name(self) -> str:
-        return "int4_direct_packed"
+        return "int4_direct_horizontal"
     
     @property
     def supported_precisions(self) -> List[ComputePrecision]:
         return [ComputePrecision.FP32, ComputePrecision.FP16]
+    
+    def _unpack_group(self, packed: np.ndarray, group_k: int) -> np.ndarray:
+        """Unpack a horizontal group of packed INT4 data."""
+        if group_k == 0:
+            return np.zeros(0, dtype=np.int8)
+        
+        # We need to know how many rows and unpack per row
+        # This is called per-row, so group_packed is for one row
+        return _unpack_int4(packed, group_k)
     
     def compute(
         self,
@@ -122,20 +137,7 @@ class Int4Matmul(LowBitMatmul):
         x: np.ndarray,
         config: ComputationConfig
     ) -> ComputeResult:
-        """
-        Compute Y = W @ X using packed INT4 representation.
-        
-        For INT4, weights are packed as 2 nibbles per uint8.
-        We unpack on-the-fly during computation to avoid full dequantization.
-        
-        Algorithm:
-        1. For each group along K dimension:
-           - Unpack weight slice for this group
-           - Extract input slice
-           - Compute partial: unpacked_Q_g @ X_g
-           - Accumulate: Y += scale_g * partial
-        """
-        # Handle both vector and matrix input
+        """Direct INT4 GEMM on packed data with horizontal grouping."""
         x_is_vector = x.ndim == 1
         if x_is_vector:
             x = x.reshape(-1, 1)
@@ -154,47 +156,45 @@ class Int4Matmul(LowBitMatmul):
         group_size = weight._group_size
         scales = weight._scales_fp32
         packed = weight._packed_data
-        
+        groups_per_row = weight._groups_per_row
         n_groups = len(scales)
         
-        # Process each group along K dimension
-        for g in range(n_groups):
-            scale = scales[g]
-            if scale == 0:
-                continue
+        bytes_per_row = (K + 1) // 2
+        
+        for r in range(weight._rows):
+            row_start = r * weight._cols
+            
+            for g in range(groups_per_row):
+                group_idx = r * groups_per_row + g
+                if group_idx >= n_groups:
+                    break
+                    
+                scale = scales[group_idx]
+                if scale == 0:
+                    continue
                 
-            k_start = g * group_size
-            k_end = min(k_start + group_size, K)
-            group_k = k_end - k_start
-            
-            # Calculate packed data indices for this group
-            # Each weight row has ceil(K/2) bytes
-            bytes_per_row = (K + 1) // 2
-            
-            # For this group, we need group_k columns
-            # Each row contributes group_k nibbles = ceil(group_k/2) bytes
-            group_bytes_per_row = (group_k + 1) // 2
-            
-            # Unpack weight slice for this group: (rows, group_k)
-            w_group = np.zeros((weight._rows, group_k), dtype=np.int8)
-            
-            for r in range(weight._rows):
-                row_start_byte = r * bytes_per_row + (k_start // 2)
-                group_packed = packed[row_start_byte:row_start_byte + group_bytes_per_row]
-                w_group[r, :] = _unpack_int4(group_packed, group_k)
-            
-            # Extract input slice: shape (group_k, N)
-            x_group = x[k_start:k_end, :]
-            
-            # Compute partial: (rows, group_k) @ (group_k, N)
-            # Accumulate in int32 to avoid overflow
-            partial = w_group.astype(np.int32) @ x_group.astype(np.int32)
-            
-            # Accumulate with scale
-            if config.accumulate_in_fp32:
-                y += (partial.astype(np.float32) * scale).astype(y.dtype)
-            else:
-                y += (partial * scale).astype(y.dtype)
+                k_start = g * group_size
+                k_end = min(k_start + group_size, K)
+                group_k = k_end - k_start
+                if group_k == 0:
+                    continue
+                
+                # Unpack this row's group
+                elements_before = r * weight._cols
+                row_bytes_start = elements_before // 2  # bytes in packed
+                g_bytes_start = g * ((group_size + 1) // 2)
+                group_packed = packed[row_bytes_start + g_bytes_start : row_bytes_start + g_bytes_start + ((group_k + 1) // 2)]
+                
+                w_group = _unpack_int4(group_packed, group_k)
+                
+                x_group = x[k_start:k_end, :]
+                
+                partial = w_group.astype(np.int32) @ x_group.astype(np.float32)
+                
+                if config.accumulate_in_fp32:
+                    y[r, :] += (partial * scale).astype(output_dtype)
+                else:
+                    y[r, :] += (partial * scale).astype(output_dtype)
         
         compute_time = time.perf_counter() - start_compute
         
@@ -208,7 +208,7 @@ class Int4Matmul(LowBitMatmul):
                 decompressed_weight_bytes=weight.decompressed_size_bytes,
                 input_bytes=x.nbytes,
                 output_bytes=y.nbytes,
-                temporary_bytes=weight._rows * group_k * 1,  # unpacked group buffer
+                temporary_bytes=0,
                 peak_bytes=weight.compressed_size_bytes + x.nbytes + y.nbytes,
             ),
             timing_stats=TimingStats(
@@ -217,9 +217,10 @@ class Int4Matmul(LowBitMatmul):
                 total_time_s=prep_time + compute_time,
             ),
             metadata={
-                "method": "int4_direct_packed",
+                "method": "int4_direct_horizontal",
                 "group_size": group_size,
                 "num_groups": n_groups,
+                "horizontal": True,
             }
         )
 
@@ -229,7 +230,6 @@ def int4_matmul_reference(
     x: np.ndarray,
     config: ComputationConfig
 ) -> ComputeResult:
-    """Reference: dequantize then matmul."""
     return create_reference_result(weight, x, config)
 
 
@@ -238,8 +238,7 @@ def int4_matmul_direct(
     x: np.ndarray,
     config: ComputationConfig
 ) -> ComputeResult:
-    """Direct INT4 matmul."""
-    return Int4Matmul().compute(weight, x, config)
+    return weight.matmul(x, config)
 
 
 def benchmark_int4(
@@ -248,27 +247,23 @@ def benchmark_int4(
     config: ComputationConfig,
     num_runs: int = 10
 ) -> Dict[str, Any]:
-    """Benchmark INT4 direct vs reference."""
-    # Warmup
     for _ in range(3):
-        _ = int4_matmul_direct(weight, x, config)
+        _ = weight.matmul(x, config)
         _ = int4_matmul_reference(weight, x, config)
     
-    # Benchmark direct
     direct_times = []
     for _ in range(num_runs):
         start = time.perf_counter()
-        direct = int4_matmul_direct(weight, x, config)
+        direct = weight.matmul(x, config)
         direct_times.append(time.perf_counter() - start)
     
-    # Benchmark reference
     ref_times = []
     for _ in range(num_runs):
         start = time.perf_counter()
         ref = int4_matmul_reference(weight, x, config)
         ref_times.append(time.perf_counter() - start)
     
-    direct = int4_matmul_direct(weight, x, config)
+    direct = weight.matmul(x, config)
     ref = int4_matmul_reference(weight, x, config)
     comparison = compare_results(direct, ref)
     

@@ -146,7 +146,7 @@ def create_synthetic_artifact(artifact_dir: str) -> None:
     artifact = writer.write()
     print(f"Created artifact at {artifact_dir}")
     print(f"  Model: {artifact.manifest.model.model_id}")
-    print(f"  Tensors: {artifact.manifest.get_tensor_count()}")
+    print(f"  Tensors: {len(artifact.manifest.tensors)}")
     print(f"  Total compressed: {artifact.manifest.get_total_compressed_bytes() / 1024:.1f} KB")
 
 

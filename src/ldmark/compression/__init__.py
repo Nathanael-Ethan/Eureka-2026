@@ -29,6 +29,10 @@ from .binary_ternary import (
     TernaryTensor,
     calculate_binary_storage,
     calculate_ternary_storage,
+    binary_quantize_sign,
+    binary_dequantize,
+    ternary_quantize_threshold,
+    ternary_dequantize,
 )
 from .prismml_calc import (
     PrismMLConfig,
@@ -64,6 +68,10 @@ __all__ = [
     "TernaryTensor",
     "calculate_binary_storage",
     "calculate_ternary_storage",
+    "binary_quantize_sign",
+    "binary_dequantize",
+    "ternary_quantize_threshold",
+    "ternary_dequantize",
     "PrismMLConfig",
     "calculate_prismml_storage",
     "prismml_q1_0_g128_bits_per_weight",

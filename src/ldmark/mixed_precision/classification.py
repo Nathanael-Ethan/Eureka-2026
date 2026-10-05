@@ -46,17 +46,17 @@ ROLE_PATTERNS: Dict[TensorRole, List[Pattern]] = {
         re.compile(r".*(qkv|in_proj).*"),
     ],
     TensorRole.MLP_UP: [
-        recompile(r".*(up_proj|fc1|mlp\.up|feed_forward\.up).*"),
+        re.compile(r".*(up_proj|fc1|mlp\.up|feed_forward\.up).*", re.IGNORECASE),
     ],
     TensorRole.MLP_DOWN: [
-        re.compile(r".*(down_proj|fc2|mlp\.down|feed_forward\.down).*"),
+        re.compile(r".*(down_proj|fc2|mlp\.down|feed_forward\.down).*", re.IGNORECASE),
     ],
     TensorRole.MLP_GATE: [
-        re.compile(r".*(gate_proj|mlp\.gate).*"),
+        re.compile(r".*(gate_proj|mlp\.gate).*", re.IGNORECASE),
     ],
     TensorRole.NORM: [
-        re.compile(r".*(norm|ln_|layer_norm|layernorm|rmsnorm).*"),
-        recompile(r".*(weight|bias).*norm.*"),
+        re.compile(r".*(norm|ln_|layer_norm|layernorm|rmsnorm).*", re.IGNORECASE),
+        re.compile(r".*(weight|bias).*norm.*", re.IGNORECASE),
     ],
     TensorRole.OUTPUT_HEAD: [
         re.compile(r".*(lm_head|output|head|final_layer).*"),
@@ -98,21 +98,24 @@ def classify_tensor(
     """
     num_parameters = np.prod(shape)
     
-    # Determine role from name
-    role = TensorRole.UNKNOWN
-    name_lower = name.lower()
-    
-    for r, patterns in ROLE_PATTERNS.items():
-        for pattern in patterns:
-            if pattern.search(name_lower):
-                role = r
-                break
-        if role != TensorRole.UNKNOWN:
-            break
-    
-    # If still unknown but is bias, mark as bias
-    if role == TensorRole.UNKNOWN and not is_weight:
+    # Check for bias suffix first
+    if name.endswith('.bias') or name.endswith('_bias'):
         role = TensorRole.BIAS
+        is_weight = False
+    else:
+        role = TensorRole.UNKNOWN
+    
+    # If not bias, determine role from name
+    if role == TensorRole.UNKNOWN:
+        name_lower = name.lower()
+        
+        for r, patterns in ROLE_PATTERNS.items():
+            for pattern in patterns:
+                if pattern.search(name_lower):
+                    role = r
+                    break
+            if role != TensorRole.UNKNOWN:
+                break
     
     return TensorClassification(
         tensor_name=name,

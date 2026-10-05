@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LDMARK Hardware - Hardware-aware compilation">
+  <title>Hardware - SIFAGI / LDMARK</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="navbar-logo">SIFAGI</span>
+        <span class="navbar-project">LDMARK</span>
+      </a>
+      <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="navbar-nav">
+        <li><a href="../index.html" class="navbar-link">Home</a></li>
+        <li><a href="compiler.html" class="navbar-link">Compiler</a></li>
+        <li><a href="compression.html" class="navbar-link">Compression</a></li>
+        <li><a href="hardware.html" class="navbar-link active">Hardware</a></li>
+        <li><a href="runtime.html" class="navbar-link">Runtime</a></li>
+        <li><a href="research.html" class="navbar-link">Research</a></li>
+        <li><a href="documentation.html" class="navbar-link">Documentation</a></li>
+        <li><a href="https://github.com" class="navbar-link" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Hardware-Aware</span>
+          <h1 class="section-title">Compile for the Machine You Actually Have</h1>
+          <p class="section-subtitle">
+            Storage feasibility does not prove runtime feasibility or model quality.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom: var(--spacing-2xl); padding: var(--spacing-xl);">
+          <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-xl); flex-wrap: wrap; font-family: var(--font-mono);">
+            <div style="text-align: center;">
+              <div style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Model</div>
+              <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">27B</div>
+            </div>
+            <div style="color: var(--text-muted);">→</div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Target RAM</div>
+              <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">16 GB</div>
+            </div>
+            <div style="color: var(--text-muted);">→</div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Storage</div>
+              <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">8 GB</div>
+            </div>
+            <div style="color: var(--text-muted);">→</div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Context</div>
+              <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">4K</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hardware-strategies">
+          <div class="strategy-card">
+            <div class="strategy-card-header">
+              <span class="strategy-card-title">FP16</span>
+              <span class="strategy-card-status no">NO</span>
+            </div>
+            <div class="strategy-card-info">
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Storage</span>
+                <span class="strategy-card-value">~54 GB</span>
+              </div>
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Fits Storage</span>
+                <span class="strategy-card-value" style="color: var(--accent-danger);">NO</span>
+              </div>
+            </div>
+          </div>
+          <div class="strategy-card">
+            <div class="strategy-card-header">
+              <span class="strategy-card-title">INT8</span>
+              <span class="strategy-card-status no">NO</span>
+            </div>
+            <div class="strategy-card-info">
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Storage</span>
+                <span class="strategy-card-value">~27.8 GB</span>
+              </div>
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Fits Storage</span>
+                <span class="strategy-card-value" style="color: var(--accent-danger);">NO</span>
+              </div>
+            </div>
+          </div>
+          <div class="strategy-card">
+            <div class="strategy-card-header">
+              <span class="strategy-card-title">INT4</span>
+              <span class="strategy-card-status no">NO</span>
+            </div>
+            <div class="strategy-card-info">
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Storage</span>
+                <span class="strategy-card-value">~13.9 GB</span>
+              </div>
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Fits Storage</span>
+                <span class="strategy-card-value" style="color: var(--accent-danger);">NO</span>
+              </div>
+            </div>
+          </div>
+          <div class="strategy-card">
+            <div class="strategy-card-header">
+              <span class="strategy-card-title">Binary / Q1-style</span>
+              <span class="strategy-card-status yes">YES</span>
+            </div>
+            <div class="strategy-card-info">
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Storage</span>
+                <span class="strategy-card-value">~3.9 GB</span>
+              </div>
+              <div class="strategy-card-row">
+                <span class="strategy-card-label">Fits Storage</span>
+                <span class="strategy-card-value" style="color: var(--accent-secondary);">YES</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: var(--spacing-2xl); padding: var(--spacing-xl); border-color: var(--accent-warning);">
+          <p style="text-align: center; color: var(--text-secondary);">
+            <strong style="color: var(--accent-warning);">Warning:</strong> Storage feasibility does not prove runtime feasibility or model quality. A representation that fits on disk may still require more RAM than available, or may produce significantly different outputs.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Hardware Detection</span>
+          <h2 class="section-title">Supported Hardware</h2>
+          <p class="section-subtitle">
+            LDMARK can detect and profile various hardware configurations.
+          </p>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card" style="text-align: center;">
+            <div class="problem-icon" style="margin: 0 auto var(--spacing-md);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                <rect x="9" y="9" width="6" height="6"/>
+                <line x1="9" y1="1" x2="9" y2="4"/>
+                <line x1="15" y1="1" x2="15" y2="4"/>
+                <line x1="9" y1="20" x2="9" y2="23"/>
+                <line x1="15" y1="20" x2="15" y2="23"/>
+                <line x1="20" y1="9" x2="23" y2="9"/>
+                <line x1="20" y1="14" x2="23" y2="14"/>
+                <line x1="1" y1="9" x2="4" y2="9"/>
+                <line x1="1" y1="14" x2="4" y2="14"/>
+              </svg>
+            </div>
+            <h3 class="problem-title">CPU</h3>
+            <p class="problem-description">
+              Intel and AMD processors with AVX2/AVX-512 support detection.
+            </p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <div class="problem-icon" style="margin: 0 auto var(--spacing-md);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <h3 class="problem-title">Apple Silicon</h3>
+            <p class="problem-description">
+              M1/M2/M3 chips with unified memory architecture support.
+            </p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <div class="problem-icon" style="margin: 0 auto var(--spacing-md);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h3 class="problem-title">GPU</h3>
+            <p class="problem-description">
+              NVIDIA (CUDA), AMD (ROCm), and Intel GPU support.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">SIFAGI</div>
+          <div class="footer-project">LDMARK</div>
+          <p class="footer-description">
+            Silicon Initiative for Artificial General Intelligence.<br>
+            Laptop Designed Model Architecture for Reasoning and Knowledge.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-title">Project</h4>
+          <ul class="footer-links">
+            <li><a href="compiler.html" class="footer-link">Compiler</a></li>
+            <li><a href="compression.html" class="footer-link">Compression</a></li>
+            <li><a href="hardware.html" class="footer-link">Hardware</a></li>
+            <li><a href="runtime.html" class="footer-link">Runtime</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Resources</h4>
+          <ul class="footer-links">
+            <li><a href="research.html" class="footer-link">Research</a></li>
+            <li><a href="documentation.html" class="footer-link">Documentation</a></li>
+            <li><a href="https://github.com" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link">License</a></li>
+            <li><a href="#" class="footer-link">Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 SIFAGI. Experimental research project.</span>
+        <div class="footer-social">
+          <a href="https://github.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

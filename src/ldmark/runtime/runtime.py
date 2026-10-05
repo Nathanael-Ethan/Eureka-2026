@@ -219,11 +219,11 @@ class LDMARKRuntime:
         return self.manifest.compression
     
     def get_tensor_count(self) -> int:
-        return self.manifest.get_tensor_count()
+        return len(self.manifest.tensors)
     
     def list_tensors(self) -> List[str]:
         """List all tensor names in the artifact."""
-        return self.manifest.get_tensor_names()
+        return [t.name for t in self.manifest.tensors]
     
     def get_tensor_info(self, name: str) -> Optional[TensorIndexEntry]:
         """Get tensor index entry (metadata only, no data loading)."""
@@ -360,9 +360,9 @@ class LDMARKRuntime:
         self._memory.record_temporary_allocation(input_bytes + weight_bytes)
         
         try:
-            # Perform matmul
+            # Perform matmul: input @ weight.T for [batch, in_features] @ [out_features, in_features].T = [batch, out_features]
             comp_start = time.perf_counter()
-            output = np.matmul(input_data, weight_data)
+            output = np.matmul(input_data, weight_data.T)
             comp_time = (time.perf_counter() - comp_start) * 1000
             
             # Convert output dtype if needed
@@ -413,8 +413,9 @@ class LDMARKRuntime:
         self._memory.record_temporary_allocation(input_bytes + weight_bytes)
         
         try:
+            # Perform matmul: input @ weight.T for [batch, in_features] @ [out_features, in_features].T = [batch, out_features]
             comp_start = time.perf_counter()
-            output = np.matmul(input_data, weight_data)
+            output = np.matmul(input_data, weight_data.T)
             comp_time = (time.perf_counter() - comp_start) * 1000
             
             if output_dtype:
@@ -586,12 +587,13 @@ class LDMARKRuntime:
     def print_memory_summary(self) -> None:
         """Print human-readable memory summary."""
         snap = self.get_memory_snapshot()
+        from src.ldmark.runtime.memory import format_bytes
         print(f"LDMARK Runtime Memory Summary")
-        print(f"  Compressed (storage):     {snap.compressed_weight_bytes / 1e9:.3f} GB")
-        print(f"  Decompressed (runtime):   {snap.decompressed_weight_bytes / 1e9:.3f} GB")
-        print(f"  Temporary (computation):  {snap.temporary_bytes / 1e9:.3f} GB")
-        print(f"  Peak temporary:           {snap.peak_temporary_bytes / 1e9:.3f} GB")
-        print(f"  Estimated peak total:     {snap.estimated_peak_bytes / 1e9:.3f} GB")
+        print(f"  Compressed (storage):     {format_bytes(snap.compressed_weight_bytes)}")
+        print(f"  Decompressed (runtime):   {format_bytes(snap.decompressed_weight_bytes)}")
+        print(f"  Temporary (computation):  {format_bytes(snap.temporary_bytes)}")
+        print(f"  Peak temporary:           {format_bytes(snap.peak_temporary_bytes)}")
+        print(f"  Estimated peak total:     {format_bytes(snap.estimated_peak_bytes)}")
     
     # === Context Manager Support ===
     

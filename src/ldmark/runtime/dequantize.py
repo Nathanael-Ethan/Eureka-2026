@@ -233,8 +233,25 @@ def dequantize_raw(
     original_shape = tuple(entry.original_shape)
     original_dtype = np.dtype(entry.original_dtype)
     
-    # Data should already be in the correct format, just reshape and convert
-    return data.reshape(original_shape).astype(original_dtype)
+    # Data is loaded as uint8 bytes, need to view as original dtype
+    num_elements = np.prod(original_shape)
+    expected_bytes = num_elements * original_dtype.itemsize
+    
+    if data.nbytes != expected_bytes:
+        # Try viewing as the correct dtype
+        if data.nbytes % original_dtype.itemsize == 0:
+            viewed = data.view(original_dtype)
+            if viewed.size == num_elements:
+                return viewed.reshape(original_shape)
+    
+    # Fallback: try to convert
+    try:
+        return data.reshape(original_shape).astype(original_dtype)
+    except ValueError:
+        # Data might be uint8 bytes, try to view as original dtype
+        if data.dtype == np.uint8 and data.nbytes == expected_bytes:
+            return data.view(original_dtype).reshape(original_shape)
+        raise
 
 
 def dequantize_tensor(

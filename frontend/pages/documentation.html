@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LDMARK Documentation - Comprehensive guides and references">
+  <title>Documentation - SIFAGI / LDMARK</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="navbar-logo">SIFAGI</span>
+        <span class="navbar-project">LDMARK</span>
+      </a>
+      <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="navbar-nav">
+        <li><a href="../index.html" class="navbar-link">Home</a></li>
+        <li><a href="compiler.html" class="navbar-link">Compiler</a></li>
+        <li><a href="compression.html" class="navbar-link">Compression</a></li>
+        <li><a href="hardware.html" class="navbar-link">Hardware</a></li>
+        <li><a href="runtime.html" class="navbar-link">Runtime</a></li>
+        <li><a href="research.html" class="navbar-link">Research</a></li>
+        <li><a href="documentation.html" class="navbar-link active">Documentation</a></li>
+        <li><a href="https://github.com" class="navbar-link" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Documentation</span>
+          <h1 class="section-title">Learn More</h1>
+          <p class="section-subtitle">
+            Comprehensive documentation for using and understanding LDMARK.
+          </p>
+        </div>
+
+        <div class="doc-cards">
+          <a href="#getting-started" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Getting Started</h3>
+            <p class="doc-card-description">
+              Install LDMARK and run your first model compilation.
+            </p>
+          </a>
+          <a href="#architecture" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Architecture</h3>
+            <p class="doc-card-description">
+              Understand the LDMARK compiler architecture and components.
+            </p>
+          </a>
+          <a href="#compiler" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Compiler</h3>
+            <p class="doc-card-description">
+              Learn how the compiler pipeline works stage by stage.
+            </p>
+          </a>
+          <a href="#compression" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Compression</h3>
+            <p class="doc-card-description">
+              Explore compression methods and their trade-offs.
+            </p>
+          </a>
+          <a href="#hardware-detection" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                <rect x="9" y="9" width="6" height="6"/>
+                <line x1="9" y1="1" x2="9" y2="4"/>
+                <line x1="15" y1="1" x2="15" y2="4"/>
+                <line x1="9" y1="20" x2="9" y2="23"/>
+                <line x1="15" y1="20" x2="15" y2="23"/>
+                <line x1="20" y1="9" x2="23" y2="9"/>
+                <line x1="20" y1="14" x2="23" y2="14"/>
+                <line x1="1" y1="9" x2="4" y2="9"/>
+                <line x1="1" y1="14" x2="4" y2="14"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Hardware Detection</h3>
+            <p class="doc-card-description">
+              How LDMARK detects and profiles hardware capabilities.
+            </p>
+          </a>
+          <a href="#planning" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Planning</h3>
+            <p class="doc-card-description">
+              How the planner chooses compression strategies.
+            </p>
+          </a>
+          <a href="#artifact-format" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Artifact Format</h3>
+            <p class="doc-card-description">
+              Specification of the LDMARK artifact format.
+            </p>
+          </a>
+          <a href="#runtime" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Runtime</h3>
+            <p class="doc-card-description">
+              How the runtime loads and executes compiled models.
+            </p>
+          </a>
+          <a href="#benchmarks" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+                <line x1="2" y1="20" x2="22" y2="20"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Benchmarks</h3>
+            <p class="doc-card-description">
+              How to run and interpret benchmark results.
+            </p>
+          </a>
+          <a href="#research-methodology" class="doc-card">
+            <div class="doc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <h3 class="doc-card-title">Research Methodology</h3>
+            <p class="doc-card-description">
+              Our approach to measuring and validating results.
+            </p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="getting-started" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Getting Started</span>
+          <h2 class="section-title">Installation & Quick Start</h2>
+        </div>
+
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+          <h3 class="problem-title" style="margin-bottom: var(--spacing-md);">Installation</h3>
+          <div class="terminal" style="margin-bottom: var(--spacing-lg);">
+            <div class="terminal-line"><span class="terminal-prompt">$ </span><span class="terminal-command">pip install -e .</span></div>
+          </div>
+
+          <h3 class="problem-title" style="margin-bottom: var(--spacing-md);">CLI Usage</h3>
+          <div class="terminal" style="margin-bottom: var(--spacing-lg);">
+            <div class="terminal-line"><span class="terminal-prompt">$ </span><span class="terminal-command">ldmark inspect path/to/model.safetensors</span></div>
+            <div class="terminal-line"><span class="terminal-output">Inspect model structure and metadata</span></div>
+            <div class="terminal-line"><span class="terminal-prompt">$ </span><span class="terminal-command">ldmark analyze path/to/model.safetensors --format json</span></div>
+            <div class="terminal-line"><span class="terminal-output">Analyze model parameters and storage</span></div>
+            <div class="terminal-line"><span class="terminal-prompt">$ </span><span class="terminal-command">ldmark compile input_model.pt output_dir/ --precision int4 --strategy balanced</span></div>
+            <div class="terminal-line"><span class="terminal-output">Compile model with INT4 quantization</span></div>
+          </div>
+
+          <h3 class="problem-title" style="margin-bottom: var(--spacing-md);">Python API</h3>
+          <div class="terminal">
+            <div class="terminal-line"><span class="terminal-command">from ldmark.analysis import ModelAnalyzer, load_numpy_dict</span></div>
+            <div class="terminal-line"><span class="terminal-command">from ldmark.compression import quantize_groupwise, QuantizationConfig</span></div>
+            <div class="terminal-line"><span class="terminal-command">from ldmark.hardware import detect_hardware</span></div>
+            <div class="terminal-line"><span class="terminal-command">from ldmark.planning import CompressionPlanner</span></div>
+            <div class="terminal-line"><span class="terminal-output"># Detect hardware and analyze model</span></div>
+            <div class="terminal-line"><span class="terminal-command">hw = detect_hardware()</span></div>
+            <div class="terminal-line"><span class="terminal-command">tensors = load_numpy_dict("model.npz")</span></div>
+            <div class="terminal-line"><span class="terminal-command">analyzer = ModelAnalyzer(model_id="my_model")</span></div>
+            <div class="terminal-line"><span class="terminal-command">analysis = analyzer.analyze_numpy_tensors(tensors)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="architecture">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Architecture</span>
+          <h2 class="section-title">System Architecture</h2>
+        </div>
+
+        <div class="architecture-diagram" role="img" aria-label="LDMARK Architecture Diagram">
+          <span class="highlight">                    LDMARK</span>
+          <span class="dim">                       │</span>
+          <span class="dim">        ┌──────────────┼──────────────┐</span>
+          <span class="dim">        │              │              │</span>
+          <span class="highlight">     ANALYSIS      COMPRESSION     HARDWARE</span>
+          <span class="dim">        │              │              │</span>
+          <span class="dim">        └──────────────┼──────────────┘</span>
+          <span class="dim">                       │</span>
+          <span class="highlight">                   PLANNING</span>
+          <span class="dim">                       │</span>
+          <span class="highlight">                   COMPILER</span>
+          <span class="dim">                       │</span>
+          <span class="dim">              ┌────────┴────────┐</span>
+          <span class="dim">              │                 │</span>
+          <span class="highlight">           ARTIFACT          VALIDATION</span>
+          <span class="dim">              │</span>
+          <span class="highlight">           RUNTIME</span>
+          <span class="dim">              │</span>
+          <span class="highlight">           COMPUTE</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="compiler" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Compiler</span>
+          <h2 class="section-title">Compiler Pipeline</h2>
+        </div>
+
+        <div class="pipeline-stages-grid">
+          <div class="pipeline-stage-card" data-stage="load">
+            <div class="stage-number">01</div>
+            <div class="stage-name">LOAD</div>
+            <div class="stage-details">Load model metadata and tensors.</div>
+          </div>
+          <div class="pipeline-stage-card" data-stage="analyze">
+            <div class="stage-number">02</div>
+            <div class="stage-name">ANALYZE</div>
+            <div class="stage-details">Examine parameters, tensors, dtypes, architecture.</div>
+          </div>
+          <div class="pipeline-stage-card" data-stage="plan">
+            <div class="stage-number">03</div>
+            <div class="stage-name">PLAN</div>
+            <div class="stage-details">Choose compression strategy.</div>
+          </div>
+          <div class="pipeline-stage-card" data-stage="transform">
+            <div class="stage-number">04</div>
+            <div class="stage-name">TRANSFORM</div>
+            <div class="stage-details">Apply representation transformation.</div>
+          </div>
+          <div class="pipeline-stage-card" data-stage="validate">
+            <div class="stage-number">05</div>
+            <div class="stage-name">VALIDATE</div>
+            <div class="stage-details">Check reconstruction and integrity.</div>
+          </div>
+          <div class="pipeline-stage-card" data-stage="export">
+            <div class="stage-number">06</div>
+            <div class="stage-name">EXPORT</div>
+            <div class="stage-details">Create versioned LDMARK artifact.</div>
+          </div>
+          <div class="pipeline-stage-card" data-stage="runtime">
+            <div class="stage-number">07</div>
+            <div class="stage-name">RUNTIME</div>
+            <div class="stage-details">Load and execute compiled representation.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="compression">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Compression</span>
+          <h2 class="section-title">Compression Methods</h2>
+        </div>
+
+        <div class="compression-lab-grid">
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Uniform Quantization</span>
+              <span class="badge badge-measured">Active</span>
+            </div>
+            <p class="research-item-description">INT8 and INT4 quantization with group-wise support.</p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Ultra-Low-Bit</span>
+              <span class="badge badge-experimental">Experimental</span>
+            </div>
+            <p class="research-item-description">Binary (1-bit) and Ternary (~1.58-bit) representations.</p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Non-Uniform</span>
+              <span class="badge badge-experimental">Experimental</span>
+            </div>
+            <p class="research-item-description">Codebook quantization and learned binary representations.</p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Future Research</span>
+              <span class="badge badge-theoretical">Future</span>
+            </div>
+            <p class="research-item-description">Mixed precision, direct low-bit computation, compression-aware training.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="hardware-detection" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Hardware Detection</span>
+          <h2 class="section-title">Supported Hardware</h2>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card" style="text-align: center;">
+            <h3 class="problem-title">CPU</h3>
+            <p class="problem-description">Intel and AMD processors with AVX2/AVX-512 support detection.</p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <h3 class="problem-title">Apple Silicon</h3>
+            <p class="problem-description">M1/M2/M3 chips with unified memory architecture support.</p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <h3 class="problem-title">GPU</h3>
+            <p class="problem-description">NVIDIA (CUDA), AMD (ROCm), and Intel GPU support.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="planning">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Planning</span>
+          <h2 class="section-title">Compression Planning</h2>
+        </div>
+
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+          <p class="problem-description" style="margin-bottom: var(--spacing-lg);">
+            The LDMARK planner considers multiple factors when selecting a compression strategy:
+          </p>
+          <ul style="color: var(--text-secondary); font-size: 0.875rem; padding-left: var(--spacing-lg); line-height: 2;">
+            <li>Model characteristics (size, architecture, dtypes)</li>
+            <li>Target hardware capabilities and constraints</li>
+            <li>Storage budget limitations</li>
+            <li>Runtime memory requirements</li>
+            <li>Context length and KV-cache estimates</li>
+            <li>User quality requirements</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="artifact-format" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Artifact Format</span>
+          <h2 class="section-title">LDMARK Artifact Structure</h2>
+        </div>
+
+        <div class="artifact-tree">
+          <span class="folder">model.ldmark/</span>
+          │
+          ├── <span class="folder">manifest/</span>
+          │   ├── <span class="file">config.json</span>
+          │   └── <span class="file">version.json</span>
+          │
+          ├── <span class="folder">metadata/</span>
+          │   ├── <span class="file">model_info.json</span>
+          │   └── <span class="file">compression.json</span>
+          │
+          ├── <span class="folder">tensors/</span>
+          │   ├── <span class="file">layer_00.bin</span>
+          │   ├── <span class="file">layer_01.bin</span>
+          │   └── <span class="comment">...</span>
+          │
+          ├── <span class="folder">compression_metadata/</span>
+          │   ├── <span class="file">scales.bin</span>
+          │   └── <span class="file">codebooks.bin</span>
+          │
+          └── <span class="folder">validation_metadata/</span>
+              ├── <span class="file">metrics.json</span>
+              └── <span class="file">checksums.json</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="runtime">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Runtime</span>
+          <h2 class="section-title">Runtime Execution</h2>
+        </div>
+
+        <div class="runtime-comparison">
+          <div class="runtime-path">
+            <h3 class="runtime-path-title">Current Approach</h3>
+            <div class="runtime-step">
+              <span class="runtime-step-number">1</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Compressed Storage</div>
+              </div>
+            </div>
+            <div class="runtime-step">
+              <span class="runtime-step-number">2</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Load</div>
+              </div>
+            </div>
+            <div class="runtime-step">
+              <span class="runtime-step-number">3</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Decompress</div>
+              </div>
+            </div>
+            <div class="runtime-step">
+              <span class="runtime-step-number">4</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Compute</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="runtime-path">
+            <h3 class="runtime-path-title">Research Direction</h3>
+            <div class="runtime-step">
+              <span class="runtime-step-number">1</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Compressed Storage</div>
+              </div>
+            </div>
+            <div class="runtime-step">
+              <span class="runtime-step-number">2</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Direct Low-Bit Computation</div>
+              </div>
+            </div>
+            <div class="runtime-step">
+              <span class="runtime-step-number">3</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">Reduced Materialization</div>
+              </div>
+            </div>
+            <div class="runtime-step">
+              <span class="runtime-step-number">4</span>
+              <div class="runtime-step-content">
+                <div class="runtime-step-label">More Efficient Runtime</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="benchmarks" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Benchmarks</span>
+          <h2 class="section-title">Illustrative Comparison</h2>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Representation</th>
+                <th>Bits/Weight</th>
+                <th>Storage</th>
+                <th>Compression</th>
+                <th>Reconstruction Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="representation">FP16</td>
+                <td class="bits">16</td>
+                <td class="storage">—</td>
+                <td class="compression">1×</td>
+                <td class="error">baseline</td>
+              </tr>
+              <tr>
+                <td class="representation">INT8</td>
+                <td class="bits">8.125</td>
+                <td class="storage">—</td>
+                <td class="compression">—</td>
+                <td class="error">measured</td>
+              </tr>
+              <tr>
+                <td class="representation">INT4</td>
+                <td class="bits">4.125</td>
+                <td class="storage">—</td>
+                <td class="compression">—</td>
+                <td class="error">measured</td>
+              </tr>
+              <tr>
+                <td class="representation">Binary</td>
+                <td class="bits">1.125</td>
+                <td class="storage">—</td>
+                <td class="compression">—</td>
+                <td class="error">measured</td>
+              </tr>
+              <tr>
+                <td class="representation">Ternary</td>
+                <td class="bits">~1.7</td>
+                <td class="storage">—</td>
+                <td class="compression">—</td>
+                <td class="error">measured</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="research-methodology">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Research Methodology</span>
+          <h2 class="section-title">Measuring Results</h2>
+        </div>
+
+        <div class="research-dimensions">
+          <div class="card dimension-card">
+            <h3 class="dimension-title">Storage</h3>
+            <p class="dimension-description">How many bytes does the compiled representation occupy?</p>
+          </div>
+          <div class="card dimension-card">
+            <h3 class="dimension-title">Numerical Error</h3>
+            <p class="dimension-description">How different is the reconstructed representation from the original?</p>
+          </div>
+          <div class="card dimension-card">
+            <h3 class="dimension-title">Behavior</h3>
+            <p class="dimension-description">Does the compressed model produce measurably different outputs?</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">SIFAGI</div>
+          <div class="footer-project">LDMARK</div>
+          <p class="footer-description">
+            Silicon Initiative for Artificial General Intelligence.<br>
+            Laptop Designed Model Architecture for Reasoning and Knowledge.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-title">Project</h4>
+          <ul class="footer-links">
+            <li><a href="compiler.html" class="footer-link">Compiler</a></li>
+            <li><a href="compression.html" class="footer-link">Compression</a></li>
+            <li><a href="hardware.html" class="footer-link">Hardware</a></li>
+            <li><a href="runtime.html" class="footer-link">Runtime</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Resources</h4>
+          <ul class="footer-links">
+            <li><a href="research.html" class="footer-link">Research</a></li>
+            <li><a href="documentation.html" class="footer-link">Documentation</a></li>
+            <li><a href="https://github.com" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link">License</a></li>
+            <li><a href="#" class="footer-link">Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 SIFAGI. Experimental research project.</span>
+        <div class="footer-social">
+          <a href="https://github.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

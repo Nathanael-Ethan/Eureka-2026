@@ -100,9 +100,11 @@ class PrecisionCandidate:
             if self.precision.is_quantized() and self.group_size:
                 # Group-wise quantization: bits + scale overhead
                 scale_bits = 16  # FP16 scale
-                self.estimated_bits_per_weight = self.precision.bits_per_weight + (scale_bits / self.group_size)
+                object.__setattr__(self, 'estimated_bits_per_weight', 
+                    self.precision.bits_per_weight + (scale_bits / self.group_size))
             else:
-                self.estimated_bits_per_weight = self.precision.bits_per_weight
+                object.__setattr__(self, 'estimated_bits_per_weight', 
+                    self.precision.bits_per_weight)
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -289,3 +291,10 @@ def get_precision_candidates(
             ))
     
     return candidates
+
+
+def create_uniform_fp16_plan(
+    classifications: Dict[str, TensorClassification],
+) -> MixedPrecisionPlan:
+    """Create a uniform FP16 plan as baseline."""
+    return create_uniform_plan("uniform_fp16", list(classifications.keys()), PrecisionType.FP16)

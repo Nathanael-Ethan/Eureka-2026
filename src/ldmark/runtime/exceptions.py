@@ -62,3 +62,14 @@ class ComputationError(LDMARKRuntimeError):
     def __init__(self, operation: str, reason: str):
         self.operation = operation
         super().__init__(f"Computation failed ({operation}): {reason}")
+
+
+class MissingFileError(LDMARKRuntimeError):
+    """Raised when a required file is missing from the artifact."""
+    
+    def __init__(self, path: str, message: str = ""):
+        self.path = path
+        msg = f"Missing file: {path}"
+        if message:
+            msg += f" - {message}"
+        super().__init__(msg)

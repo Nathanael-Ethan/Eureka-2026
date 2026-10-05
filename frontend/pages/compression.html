@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LDMARK Compression - Interactive compression visualization">
+  <title>Compression - SIFAGI / LDMARK</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a href="../index.html" class="navbar-brand">
+        <span class="navbar-logo">SIFAGI</span>
+        <span class="navbar-project">LDMARK</span>
+      </a>
+      <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="navbar-nav">
+        <li><a href="../index.html" class="navbar-link">Home</a></li>
+        <li><a href="compiler.html" class="navbar-link">Compiler</a></li>
+        <li><a href="compression.html" class="navbar-link active">Compression</a></li>
+        <li><a href="hardware.html" class="navbar-link">Hardware</a></li>
+        <li><a href="runtime.html" class="navbar-link">Runtime</a></li>
+        <li><a href="research.html" class="navbar-link">Research</a></li>
+        <li><a href="documentation.html" class="navbar-link">Documentation</a></li>
+        <li><a href="https://github.com" class="navbar-link" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Compression</span>
+          <h1 class="section-title">Representation vs Storage</h1>
+          <p class="section-subtitle">
+            How different parameter representations affect theoretical storage requirements.
+          </p>
+        </div>
+
+        <div class="compression-viz">
+          <div style="margin-bottom: var(--spacing-xl);">
+            <label class="form-label" for="compression-model-size">Model Size</label>
+            <select class="form-select" id="compression-model-size" style="max-width: 240px;">
+              <option value="7B">7B Parameters</option>
+              <option value="13B">13B Parameters</option>
+              <option value="27B" selected>27B Parameters</option>
+              <option value="70B">70B Parameters</option>
+            </select>
+          </div>
+
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">FP32</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-fp32" style="width: 100%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-fp32">—</span>
+          </div>
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">FP16</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-fp16" style="width: 50%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-fp16">—</span>
+          </div>
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">INT8</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-int8" style="width: 25%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-int8">—</span>
+          </div>
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">INT4</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-int4" style="width: 12.5%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-int4">—</span>
+          </div>
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">Binary</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-binary" style="width: 3.125%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-binary">—</span>
+          </div>
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">Ternary</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-ternary" style="width: 4.9%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-ternary">—</span>
+          </div>
+          <div class="compression-bar-row">
+            <span class="compression-bar-label">Codebook</span>
+            <div class="compression-bar-container">
+              <div class="compression-bar-fill" id="bar-codebook" style="width: 2%;"></div>
+            </div>
+            <span class="compression-bar-value" id="value-codebook">—</span>
+          </div>
+
+          <div style="margin-top: var(--spacing-xl); padding: var(--spacing-lg); background: var(--bg-card); border: 1px solid var(--bg-border); border-radius: var(--radius-md);">
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.7;">
+              <strong style="color: var(--accent-warning);">Note:</strong> These are theoretical / estimated representation sizes based on bits-per-weight calculations. Actual artifact size depends on metadata, scales, codebooks, tensor layout, alignment, compression format, and implementation details.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="background: var(--bg-secondary);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Compression Methods</span>
+          <h2 class="section-title">Available Representations</h2>
+          <p class="section-subtitle">
+            LDMARK supports multiple compression representations with different trade-offs.
+          </p>
+        </div>
+
+        <div class="compression-lab-grid">
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">FP32</span>
+              <span class="badge badge-measured">Baseline</span>
+            </div>
+            <p class="research-item-description">
+              Full 32-bit floating point. The original precision for most models. No compression.
+            </p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">FP16</span>
+              <span class="badge badge-measured">Active</span>
+            </div>
+            <p class="research-item-description">
+              Half precision floating point. 16 bits per parameter. Common for GPU inference.
+            </p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">INT8</span>
+              <span class="badge badge-measured">Active</span>
+            </div>
+            <p class="research-item-description">
+              8-bit integer quantization. ~8.125 bits per weight with scales. Good balance of size and quality.
+            </p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">INT4</span>
+              <span class="badge badge-measured">Active</span>
+            </div>
+            <p class="research-item-description">
+              4-bit integer quantization with group-wise scales. ~4.125 bits per weight. Significant compression.
+            </p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Binary</span>
+              <span class="badge badge-experimental">Experimental</span>
+            </div>
+            <p class="research-item-description">
+              1-bit quantization. ~1.125 bits per weight. Extreme compression with significant quality trade-offs.
+            </p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Ternary</span>
+              <span class="badge badge-experimental">Experimental</span>
+            </div>
+            <p class="research-item-description">
+              ~1.58-bit quantization with three levels. Middle ground between binary and INT4.
+            </p>
+          </div>
+          <div class="research-item">
+            <div class="research-item-header">
+              <span class="research-item-name">Codebook</span>
+              <span class="badge badge-experimental">Experimental</span>
+            </div>
+            <p class="research-item-description">
+              Non-uniform quantization using learned codebooks. Potentially more accurate than uniform methods.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">SIFAGI</div>
+          <div class="footer-project">LDMARK</div>
+          <p class="footer-description">
+            Silicon Initiative for Artificial General Intelligence.<br>
+            Laptop Designed Model Architecture for Reasoning and Knowledge.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-title">Project</h4>
+          <ul class="footer-links">
+            <li><a href="compiler.html" class="footer-link">Compiler</a></li>
+            <li><a href="compression.html" class="footer-link">Compression</a></li>
+            <li><a href="hardware.html" class="footer-link">Hardware</a></li>
+            <li><a href="runtime.html" class="footer-link">Runtime</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Resources</h4>
+          <ul class="footer-links">
+            <li><a href="research.html" class="footer-link">Research</a></li>
+            <li><a href="documentation.html" class="footer-link">Documentation</a></li>
+            <li><a href="https://github.com" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link">License</a></li>
+            <li><a href="#" class="footer-link">Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 SIFAGI. Experimental research project.</span>
+        <div class="footer-social">
+          <a href="https://github.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/compression.js"></script>
+</body>
+</html>

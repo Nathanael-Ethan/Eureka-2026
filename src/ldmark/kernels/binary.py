@@ -2,6 +2,8 @@
 LDMARK Binary Direct Computation Kernel
 
 Binary sign weight matrix multiplication using packed bits.
+Uses horizontal group layout (per-row) for the common case.
+Falls back to dequantization for edge cases.
 """
 
 from __future__ import annotations
@@ -34,6 +36,8 @@ class BinaryMatrix(LowBitMatrix):
     Binary quantized matrix (sign weights {-1, +1}).
     
     Weights stored as packed bits (1 bit per weight).
+    Supports direct matrix multiplication on packed bits
+    when horizontal grouping is valid.
     """
     
     def __init__(
@@ -41,16 +45,8 @@ class BinaryMatrix(LowBitMatrix):
         binary_tensor: BinaryTensor,
         input_shape: Optional[Tuple[int, int]] = None,
     ):
-        """
-        Initialize from a BinaryTensor.
-        
-        Args:
-            binary_tensor: The binary weight tensor
-            input_shape: Optional explicit input shape (out_features, in_features)
-        """
         self._btensor = binary_tensor
         
-        # Determine matrix shape
         if input_shape is not None:
             self._shape = input_shape
         else:
@@ -63,14 +59,20 @@ class BinaryMatrix(LowBitMatrix):
         self._rows, self._cols = self._shape
         self._group_size = binary_tensor.config.group_size
         
-        # Scales
         self._scales_fp32 = binary_tensor.scales.astype(np.float32)
         self._packed_data = binary_tensor.packed_data
+        self._n_groups = len(binary_tensor.scales)
         
-        # Compute size info
         self._compressed_bytes = (binary_tensor.packed_data.nbytes + 
                                   binary_tensor.scales.nbytes)
-        self._decompressed_bytes = self._rows * self._cols * 4  # FP32
+        self._decompressed_bytes = self._rows * self._cols * 4
+        
+        self._groups_per_row = self._cols // self._group_size
+        if self._cols % self._group_size != 0:
+            self._groups_per_row += 1
+        self._horizontal_valid = (self._cols >= self._group_size and 
+                                   self._cols % self._group_size == 0 and
+                                   self._n_groups == self._rows * (self._cols // self._group_size))
     
     @property
     def shape(self) -> Tuple[int, int]:
@@ -89,30 +91,21 @@ class BinaryMatrix(LowBitMatrix):
         return self._decompressed_bytes
     
     def dequantize(self) -> np.ndarray:
-        """Full dequantization to FP32 for reference."""
         return binary_dequantize(self._btensor).astype(np.float32)
     
     def matmul(self, x: np.ndarray, config: ComputationConfig) -> ComputeResult:
-        """Direct binary GEMM on packed bits."""
-        return BinaryMatmul().compute(self, x, config)
-
-
-class BinaryMatmul(LowBitMatmul):
-    """Binary direct matrix multiplication kernel using packed bits."""
+        if self._horizontal_valid:
+            return BinaryMatmulHorizontal().compute(self, x, config)
+        else:
+            return self._fallback_matmul(x, config)
     
-    def __init__(self):
-        pass
+    def _fallback_matmul(self, x: np.ndarray, config: ComputationConfig) -> ComputeResult:
+        return create_reference_result(self, x, config)
     
-    @property
-    def name(self) -> str:
-        return "binary_direct_packed"
-    
-    @property
-    def supported_precisions(self) -> List[ComputePrecision]:
-        return [ComputePrecision.FP32, ComputePrecision.FP16]
-    
-    def _unpack_bits(self, packed: np.ndarray, num_weights: int) -> np.ndarray:
-        """Unpack bits to {-1, +1} int8 array."""
+    def _unpack_bits_row(self, packed: np.ndarray, num_weights: int) -> np.ndarray:
+        """Unpack bits to {-1, +1} int8 array for a single row."""
+        if num_weights == 0:
+            return np.zeros(0, dtype=np.int8)
         unpacked = np.zeros(num_weights, dtype=np.int8)
         for i in range(num_weights):
             byte_idx = i // 8
@@ -120,6 +113,21 @@ class BinaryMatmul(LowBitMatmul):
             bit = (packed[byte_idx] >> bit_idx) & 1
             unpacked[i] = 1 if bit else -1
         return unpacked
+
+
+class BinaryMatmulHorizontal(LowBitMatmul):
+    """Binary direct matmul for horizontal group layout."""
+    
+    def __init__(self):
+        pass
+    
+    @property
+    def name(self) -> str:
+        return "binary_direct_horizontal"
+    
+    @property
+    def supported_precisions(self) -> List[ComputePrecision]:
+        return [ComputePrecision.FP32, ComputePrecision.FP16]
     
     def compute(
         self,
@@ -127,16 +135,6 @@ class BinaryMatmul(LowBitMatmul):
         x: np.ndarray,
         config: ComputationConfig
     ) -> ComputeResult:
-        """
-        Compute Y = W @ X using packed binary representation.
-        
-        Binary weights: -1 (bit=0) or +1 (bit=1)
-        Computation: Y = sum_g (scale_g * (sign_g @ X_g))
-        
-        Since binary weights are just {-1, +1}, the multiplication
-        is effectively signed addition/subtraction.
-        """
-        # Handle both vector and matrix input
         x_is_vector = x.ndim == 1
         if x_is_vector:
             x = x.reshape(-1, 1)
@@ -155,44 +153,44 @@ class BinaryMatmul(LowBitMatmul):
         group_size = weight._group_size
         scales = weight._scales_fp32
         packed = weight._packed_data
-        
+        groups_per_row = weight._groups_per_row
         n_groups = len(scales)
         
-        # Process each group along K dimension
-        for g in range(n_groups):
-            scale = scales[g]
-            if scale == 0:
-                continue
+        bytes_per_row = (K + 7) // 8
+        
+        for r in range(weight._rows):
+            row_start = r * weight._cols
+            row_bytes_start = row_start // 8
+            
+            for g in range(groups_per_row):
+                group_idx = r * groups_per_row + g
+                if group_idx >= n_groups:
+                    break
+                    
+                scale = scales[group_idx]
+                if scale == 0:
+                    continue
                 
-            k_start = g * group_size
-            k_end = min(k_start + group_size, K)
-            group_k = k_end - k_start
-            
-            # Unpack weight slice for this group
-            # Each row has ceil(K/8) bytes
-            bytes_per_row = (K + 7) // 8
-            group_bytes_per_row = (group_k + 7) // 8
-            
-            # Unpack group: (rows, group_k)
-            w_group = np.zeros((weight._rows, group_k), dtype=np.int8)
-            
-            for r in range(weight._rows):
-                row_start_byte = r * bytes_per_row + (k_start // 8)
-                group_packed = packed[row_start_byte:row_start_byte + group_bytes_per_row]
-                w_group[r, :] = self._unpack_bits(group_packed, group_k)
-            
-            # Extract input slice
-            x_group = x[k_start:k_end, :]
-            
-            # Compute: {-1, +1} @ X = sum(where w=+1) - sum(where w=-1)
-            # Can optimize: partial = pos_sum - neg_sum
-            # But for correctness, just use matmul
-            partial = w_group.astype(np.int32) @ x_group.astype(np.int32)
-            
-            if config.accumulate_in_fp32:
-                y += (partial.astype(np.float32) * scale).astype(y.dtype)
-            else:
-                y += (partial * scale).astype(y.dtype)
+                k_start = g * group_size
+                k_end = min(k_start + group_size, K)
+                group_k = k_end - k_start
+                if group_k == 0:
+                    continue
+                
+                # Unpack this row's group
+                g_bytes_start = g * ((group_size + 7) // 8)
+                group_packed = packed[row_bytes_start + g_bytes_start : row_bytes_start + g_bytes_start + ((group_k + 7) // 8)]
+                
+                w_group = weight._unpack_bits_row(group_packed, group_k)
+                
+                x_group = x[k_start:k_end, :]
+                
+                partial = w_group.astype(np.int32) @ x_group.astype(np.float32)
+                
+                if config.accumulate_in_fp32:
+                    y[r, :] += (partial * scale).astype(output_dtype)
+                else:
+                    y[r, :] += (partial * scale).astype(output_dtype)
         
         compute_time = time.perf_counter() - start_compute
         
@@ -206,7 +204,7 @@ class BinaryMatmul(LowBitMatmul):
                 decompressed_weight_bytes=weight.decompressed_size_bytes,
                 input_bytes=x.nbytes,
                 output_bytes=y.nbytes,
-                temporary_bytes=weight._rows * group_k * 1,  # unpacked buffer
+                temporary_bytes=0,
                 peak_bytes=weight.compressed_size_bytes + x.nbytes + y.nbytes,
             ),
             timing_stats=TimingStats(
@@ -215,9 +213,10 @@ class BinaryMatmul(LowBitMatmul):
                 total_time_s=prep_time + compute_time,
             ),
             metadata={
-                "method": "binary_direct_packed",
+                "method": "binary_direct_horizontal",
                 "group_size": group_size,
                 "num_groups": n_groups,
+                "horizontal": True,
             }
         )
 
@@ -227,7 +226,6 @@ def binary_matmul_reference(
     x: np.ndarray,
     config: ComputationConfig
 ) -> ComputeResult:
-    """Reference: dequantize then matmul."""
     return create_reference_result(weight, x, config)
 
 
@@ -236,8 +234,7 @@ def binary_matmul_direct(
     x: np.ndarray,
     config: ComputationConfig
 ) -> ComputeResult:
-    """Direct binary matmul."""
-    return BinaryMatmul().compute(weight, x, config)
+    return weight.matmul(x, config)
 
 
 def benchmark_binary(
@@ -246,16 +243,14 @@ def benchmark_binary(
     config: ComputationConfig,
     num_runs: int = 10
 ) -> Dict[str, Any]:
-    """Benchmark binary direct vs reference."""
-    # Warmup
     for _ in range(3):
-        _ = binary_matmul_direct(weight, x, config)
+        _ = weight.matmul(x, config)
         _ = binary_matmul_reference(weight, x, config)
     
     direct_times = []
     for _ in range(num_runs):
         start = time.perf_counter()
-        direct = binary_matmul_direct(weight, x, config)
+        direct = weight.matmul(x, config)
         direct_times.append(time.perf_counter() - start)
     
     ref_times = []
@@ -264,7 +259,7 @@ def benchmark_binary(
         ref = binary_matmul_reference(weight, x, config)
         ref_times.append(time.perf_counter() - start)
     
-    direct = binary_matmul_direct(weight, x, config)
+    direct = weight.matmul(x, config)
     ref = binary_matmul_reference(weight, x, config)
     comparison = compare_results(direct, ref)
     
