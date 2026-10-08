@@ -254,6 +254,9 @@ class LDMARKRuntime:
             tensor = self._loaded_tensors[name]
             if decompress and not tensor.is_decompressed:
                 tensor.decompress(self.target_dtype)
+                decomp_bytes = tensor.dequantized.decompressed_size_bytes
+                compressed_bytes = tensor.entry.byte_length + tensor.entry.scale_byte_length
+                self._memory.record_tensor_decompress(compressed_bytes, decomp_bytes)
             return tensor
         
         # Load from artifact
@@ -453,6 +456,51 @@ class LDMARKRuntime:
     def get_peak_memory_estimate(self) -> int:
         """Get estimated peak memory usage."""
         return self._memory.get_peak_estimate()
+
+    def get_peak_rss_bytes(self) -> int:
+        """Measured process peak RSS in bytes (OS readback, not a counter)."""
+        from src.ldmark.runtime.memory import get_process_rss_bytes
+        return get_process_rss_bytes()
+
+    def estimated_full_decompressed_bytes(self, target_dtype: Optional[np.dtype] = None) -> int:
+        """Estimate runtime memory if ALL tensors were decompressed (weights only).
+
+        STORAGE (compressed on disk) vs RUNTIME (decompressed in RAM) are
+        deliberately separate: this returns the runtime side.
+        """
+        import numpy as np
+        dtype = np.dtype(target_dtype or self.target_dtype)
+        total = 0
+        for t in self.manifest.tensors:
+            n = 1
+            for d in t.original_shape:
+                n *= d
+            total += n * dtype.itemsize
+        return int(total)
+
+    def check_budget(self, max_runtime_memory_bytes: int, label: str = "plan") -> Dict:
+        """Check estimated full-decompressed runtime against a budget.
+
+        Raises MemoryAccountingError with a clear message when over budget.
+        Returns a verdict dict when within budget.
+        """
+        from src.ldmark.runtime.memory import format_bytes
+        from .exceptions import MemoryAccountingError
+        est = self.estimated_full_decompressed_bytes()
+        if est > max_runtime_memory_bytes:
+            over = est - max_runtime_memory_bytes
+            raise MemoryAccountingError(
+                f"REJECTED: {label} estimated runtime {format_bytes(est)} "
+                f"exceeds budget {format_bytes(max_runtime_memory_bytes)} "
+                f"by {format_bytes(over)}. Storage (compressed) != runtime "
+                f"(decompressed): reduce tensors, context, or batch."
+            )
+        return {
+            "fits": True,
+            "estimated_runtime_bytes": est,
+            "budget_bytes": max_runtime_memory_bytes,
+            "label": label,
+        }
     
     # === Benchmarking ===
     

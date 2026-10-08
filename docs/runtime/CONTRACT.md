@@ -119,6 +119,25 @@ The following formats are defined in the artifact specification but **NOT suppor
 - `runtime.get_tensor(name)` — Loads ONLY the requested tensor
 - `runtime.get_tensor(name, decompress=True)` — Loads AND decompresses
 - `runtime.get_tensor_data(name)` — Loads and decompresses in one call
+- `mmap_tensors=True` — Memory-maps tensor payloads (used for large models);
+  `open()` still MUST NOT fault payloads in.
+
+### 4.1b Laptop Budget Enforcement (M3)
+
+- `runtime.estimated_full_decompressed_bytes()` — Estimated RUNTIME (decompressed
+  fp16/fp32 weights) if all tensors were expanded. This is NOT storage size.
+- `runtime.check_budget(max_runtime_memory_bytes, label)` — Returns a `fits`
+  verdict dict when within budget; raises `MemoryAccountingError` with a
+  `REJECTED: ...` message (estimated runtime, budget, overage) when over.
+- `hardware.laptop_budget_4gb()` / `laptop_budget_8gb()` — Predefined laptop
+  budgets (2GB / 4GB runtime caps, CPU-only, M1 baseline = 8GB).
+- `hardware.laptop_cpu_profile_4gb/8gb()` / `apple_silicon_cpu_profile()` —
+  CPU-only profiles; `gpu is None` by design (no GPU execution assumed).
+- `strategy.feasibility.check_plan_against_laptop_budget(...)` — Rejects
+  over-budget plans with `ValueError("REJECTED: ...")`; storage (compressed)
+  vs runtime (decompressed) kept separate.
+- `runtime.get_peak_rss_bytes()` / `memory.get_process_rss_bytes()` — MEASURED
+  OS peak RSS readback, distinct from estimated counters.
 
 ### 4.2 Tensor Lifecycle
 

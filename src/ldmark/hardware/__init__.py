@@ -15,9 +15,18 @@ from .profile import (
     SystemProfile,
     RuntimeProfile,
     HardwareProfile,
+    apple_silicon_cpu_profile,
+    laptop_cpu_profile_4gb,
+    laptop_cpu_profile_8gb,
 )
 from .detection import detect_hardware, DetectionResult
-from .memory_budget import MemoryBudget, MemoryBudgetResult
+from .memory_budget import (
+    MemoryBudget,
+    MemoryBudgetResult,
+    laptop_budget_4gb,
+    laptop_budget_8gb,
+    check_runtime_against_budget,
+)
 
 __all__ = [
     "CPUArchitecture",
@@ -33,4 +42,10 @@ __all__ = [
     "DetectionResult",
     "MemoryBudget",
     "MemoryBudgetResult",
+    "apple_silicon_cpu_profile",
+    "laptop_cpu_profile_4gb",
+    "laptop_cpu_profile_8gb",
+    "laptop_budget_4gb",
+    "laptop_budget_8gb",
+    "check_runtime_against_budget",
 ]

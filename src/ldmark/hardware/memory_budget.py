@@ -182,3 +182,62 @@ def calculate_memory_budget(
         warnings=warnings,
         assumptions=assumptions,
     )
+
+
+# --- Predefined laptop budgets (M3) ---
+# Keep STORAGE budget separate from RUNTIME budget. Runtime covers weights
+# (decompressed) + KV cache + activations + overhead.
+
+def laptop_budget_4gb(
+    reserve_free_bytes: int = 1 * 1024 ** 3,
+    overhead_bytes: int = 256 * 1024 ** 2,
+) -> MemoryBudget:
+    """4GB laptop: ~2GB usable runtime budget, 1GB kept free."""
+    return MemoryBudget(
+        max_model_storage_bytes=2 * 1024 ** 3,
+        max_runtime_memory_bytes=2 * 1024 ** 3,
+        minimum_free_memory_bytes=reserve_free_bytes,
+        target_precision="int8",
+        preferred_backend="cpu",
+    )
+
+
+def laptop_budget_8gb(
+    reserve_free_bytes: int = 1 * 1024 ** 3,
+    overhead_bytes: int = 256 * 1024 ** 2,
+) -> MemoryBudget:
+    """8GB laptop (M1 baseline): ~4GB usable runtime budget, 1GB kept free."""
+    return MemoryBudget(
+        max_model_storage_bytes=4 * 1024 ** 3,
+        max_runtime_memory_bytes=4 * 1024 ** 3,
+        minimum_free_memory_bytes=reserve_free_bytes,
+        target_precision="int8",
+        preferred_backend="cpu",
+    )
+
+
+def check_runtime_against_budget(
+    estimated_runtime_bytes: int,
+    budget: MemoryBudget,
+    label: str = "plan",
+) -> MemoryBudgetResult:
+    """Enforce a runtime plan against a laptop budget.
+
+    Returns the MemoryBudgetResult; callers should reject when
+    fits_runtime_budget is False. The rejection message names the overage.
+    """
+    result = calculate_memory_budget(
+        model_storage_bytes=0,
+        weights_bytes=estimated_runtime_bytes,
+        budget=budget,
+        available_memory_bytes=budget.max_runtime_memory_bytes,
+    )
+    if not result.fits_runtime_budget:
+        over = estimated_runtime_bytes - (budget.max_runtime_memory_bytes or 0)
+        result.warnings.append(
+            f"REJECTED: {label} needs {estimated_runtime_bytes:,} bytes runtime "
+            f"({estimated_runtime_bytes / 1024**3:.3f} GB), exceeding budget "
+            f"{budget.max_runtime_memory_bytes:,} bytes by {over:,} bytes. "
+            f"Reduce decompressed weights, context length, or batch size."
+        )
+    return result

@@ -293,3 +293,49 @@ class HardwareProfile:
         if self.runtime.supported_backends:
             return self.runtime.supported_backends[0]
         return GPURuntime.NONE
+
+
+# --- Predefined laptop profiles (M3: laptop-ready runtime) ---
+# Storage size vs runtime memory are kept separate: these profiles describe
+# RUNTIME memory available for weights + KV + activations + overhead.
+
+def _laptop_cpu_profile(total_ram_bytes: int, model: str) -> HardwareProfile:
+    import platform as _platform
+    gb = round(total_ram_bytes / (1024 ** 3), 2)
+    return HardwareProfile(
+        cpu=CPUProfile(
+            architecture=CPUArchitecture.ARM64 if _platform.machine().lower() in ("arm64", "aarch64") else CPUArchitecture.X86_64,
+            vendor="Apple" if "apple" in model.lower() or "m1" in model.lower() else "unknown",
+            model=model,
+            core_count=8,
+            thread_count=8,
+            simd=SIMDCapabilities(neon=True),
+        ),
+        gpu=None,  # CPU-only laptop profile: no GPU execution assumed
+        system=SystemProfile(
+            total_ram_bytes=total_ram_bytes,
+            total_ram_gb=gb,
+            operating_system=_platform.system(),
+            os_version=_platform.version(),
+            python_version=_platform.python_version(),
+            platform_info=_platform.platform(),
+        ),
+        runtime=RuntimeProfile(supported_backends=[], metal_available=False),
+        detection_timestamp="",
+        detection_notes=[f"Predefined laptop CPU profile ({gb}GB total RAM, CPU-only, Apple Silicon compatible)."],
+    )
+
+
+def apple_silicon_cpu_profile(total_ram_bytes: int = 8 * 1024 ** 3) -> HardwareProfile:
+    """Apple Silicon laptop, CPU-only execution (no Metal kernels assumed)."""
+    return _laptop_cpu_profile(total_ram_bytes, "Apple Silicon (M1 baseline, CPU)")
+
+
+def laptop_cpu_profile_4gb() -> HardwareProfile:
+    """4GB laptop-class CPU profile (tightest supported budget)."""
+    return _laptop_cpu_profile(4 * 1024 ** 3, "Generic laptop CPU (4GB class)")
+
+
+def laptop_cpu_profile_8gb() -> HardwareProfile:
+    """8GB laptop-class CPU profile (standard laptop budget)."""
+    return _laptop_cpu_profile(8 * 1024 ** 3, "Generic laptop CPU (8GB class)")

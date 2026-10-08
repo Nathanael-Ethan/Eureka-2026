@@ -187,6 +187,29 @@ def estimate_memory_impact(
     }
 
 
+def get_process_rss_bytes() -> int:
+    """Return current process RSS in bytes (measured, not estimated).
+
+    Uses resource.getrusage on POSIX, falls back to 0 when unavailable.
+    This is MEASURED runtime memory, distinct from estimated counters.
+    """
+    try:
+        import resource
+        rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # Linux reports KB, macOS reports bytes
+        import platform
+        if platform.system() == "Darwin":
+            return int(rss)
+        return int(rss * 1024)
+    except Exception:
+        return 0
+
+
+def get_current_rss_bytes() -> int:
+    """Best-effort current RSS (falls back to ru_maxrss peak on POSIX)."""
+    return get_process_rss_bytes()
+
+
 def format_bytes(bytes_val: int) -> str:
     """Format bytes as human-readable string."""
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:

@@ -24,6 +24,8 @@ from .memory import (
     estimate_memory_impact,
     format_bytes,
     print_memory_comparison,
+    get_process_rss_bytes,
+    get_current_rss_bytes,
 )
 from .dequantize import (
     dequantize_tensor,
@@ -65,6 +67,8 @@ __all__ = [
     "estimate_memory_impact",
     "format_bytes",
     "print_memory_comparison",
+    "get_process_rss_bytes",
+    "get_current_rss_bytes",
     # Dequantization
     "dequantize_tensor",
     "DequantizedTensor",

@@ -25,12 +25,20 @@ src/ldmark/
 ├── __init__.py          # Package entry point
 ├── cli.py               # Command-line interface
 ├── analysis/            # Model analysis (tensors, parameters, architecture, storage, runtime)
+├── artifact/            # Compiled artifact format (read/write, integrity)
+├── benchmark/           # Benchmarking (runner, regression, storage, export)
 ├── compiler/            # Compilation pipeline (config, stages, pipeline orchestration)
 ├── compression/         # Quantization, binary/ternary, PrismML, experiments
+├── compute/             # Compute abstraction
+├── evaluation/          # Behavioral evaluation (engine, prompts, reporting) — experimental
 ├── file_io/             # Model loading, format detection, metadata
 ├── hardware/            # Hardware profiling and memory budgets
+├── kernels/             # Dequantization kernels (int8, int4, binary, ternary)
+├── mixed_precision/     # Mixed-precision planning and error analysis
 ├── model_io/            # Bridge layer for model inspection
-└── planning/            # Compression planning engine
+├── planning/            # Compression planning engine
+├── runtime/             # Runtime loading, dequantization, memory accounting
+└── strategy/            # Feasibility and scenario engine
 ```
 
 ## Installation
@@ -123,6 +131,14 @@ python experiments/compression/run_experiments.py
 ```
 
 This runs a suite of quantization experiments (FP32/FP16 → INT8/INT4) and validates PrismML storage calculations.
+
+## Evaluation (experimental)
+
+Behavioral evaluation measures how compression changes model outputs on a fixed
+prompt suite (token match, logit MAE/cosine, top-k agreement, perplexity ratio).
+It is uncommitted work in `src/ldmark/evaluation/` with methodology in
+`docs/evaluation/METHODOLOGY.md`. Results describe only the tested model and
+suite — see the methodology doc for interpretation limits.
 
 ## Requirements
 

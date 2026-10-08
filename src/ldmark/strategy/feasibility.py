@@ -495,3 +495,45 @@ def get_available_representations(
             return filtered
     
     return all_formats
+
+# --- M3: laptop-runtime enforcement (decompressed weights, not storage) ---
+# NOTE: calculate_runtime_memory() estimates weights at the COMPRESSED width
+# (bits_per_weight). This runtime fully dequantizes to fp16/fp32, so the true
+# runtime weight footprint is param_count * target_dtype bytes. Use the helper
+# below for laptop budget enforcement.
+
+def estimate_decompressed_runtime_bytes(
+    param_count: int,
+    target_dtype_bytes: int = 2,
+    kv_cache_bytes: int = 0,
+    activations_bytes: int = 0,
+    overhead_bytes: int = 0,
+) -> int:
+    """Runtime (decompressed) weight memory + extras. Storage size excluded."""
+    return param_count * target_dtype_bytes + kv_cache_bytes + activations_bytes + overhead_bytes
+
+
+def check_plan_against_laptop_budget(
+    param_count: int,
+    max_runtime_memory_bytes: int,
+    target_dtype_bytes: int = 2,
+    kv_cache_bytes: int = 0,
+    activations_bytes: int = 0,
+    overhead_bytes: int = 0,
+    label: str = "plan",
+) -> dict:
+    """Reject over-budget plans with a clear message; verdict dict otherwise."""
+    est = estimate_decompressed_runtime_bytes(
+        param_count, target_dtype_bytes, kv_cache_bytes, activations_bytes, overhead_bytes
+    )
+    if est > max_runtime_memory_bytes:
+        over = est - max_runtime_memory_bytes
+        raise ValueError(
+            f"REJECTED: {label} estimated runtime {est:,} bytes "
+            f"({est / 1024**3:.3f} GB) exceeds laptop budget "
+            f"{max_runtime_memory_bytes:,} bytes by {over:,} bytes. "
+            f"Storage (compressed) != runtime (decompressed). "
+            f"Reduce parameters, precision width, context, or batch."
+        )
+    return {"fits": True, "estimated_runtime_bytes": est,
+            "budget_bytes": max_runtime_memory_bytes, "label": label}
